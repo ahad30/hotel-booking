@@ -1,0 +1,230 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    font-family: "Poppins", sans-serif;
+  }
+
+
+  .loader {
+    width: 96px;
+    box-sizing: content-box;
+    height: 48px;
+    background: #FFF;
+    border-color: #de3500;
+    border-style: solid;
+    border-width: 2px 2px 50px 2px;
+    border-radius: 100%;
+    position: relative;
+    animation: 3s yinYang linear infinite;
+  }
+  .loader:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    background: #FFF;
+    border: 18px solid #de3500;
+    border-radius: 100%;
+    width: 12px;
+    height: 12px;
+    box-sizing: content-box;
+  }
+  .loader:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: #f06136;
+    border: 18px solid #FFF;
+    border-radius: 100%;
+    width: 12px;
+    height: 12px;
+    box-sizing: content-box;
+  }
+  @keyframes yinYang {
+    100%{transform: rotate(360deg)}
+  }
+
+  .wrapper::-webkit-scrollbar {
+    width: 4px;
+    height: 5px;
+    background-color: #aaa;
+    /* or add it to the track */
+  
+  }
+  
+  /* Add a thumb */
+  .wrapper::-webkit-scrollbar-thumb {
+    background: #03A9F4;
+  }
+
+  /* Scrollber */
+
+  /* width */
+  .scrollbar-0::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  /* Track */
+  .scrollbar-0::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  /* Handle */
+  .scrollbar-0::-webkit-scrollbar-thumb {
+    background: #a7abe8;
+  }
+
+  /* Handle on hover */
+  .scrollbar-0::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+
+
+
+/* styles.css */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 0; /* Adjust this value to make the scrollbar thinner or thicker */
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: white; /* Optional: Track color */
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #ffffff; /* Optional: Thumb color */
+  border-radius: 0px; /* Optional: Round corners */
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ffffff; /* Optional: Thumb color on hover */
+}
+
+.transition-max-height {
+  transition: max-height 0.6s ease-in-out, opacity 0.6s ease-in-out;
+}
+
+.opening {
+  max-height: 24rem; /* Adjust as needed */
+  opacity: 1;
+  transition-duration: 1s; /* Opening duration */
+}
+
+.closing {
+  max-height: 0;
+  opacity: 0;
+  transition-duration: 0.6s; /* Closing duration */
+}
+
+.max-h-0 {
+  max-height: 0;
+  opacity: 0;
+}
+
+.max-h-96 {
+  max-height: 24rem; /* TailwindCSS equivalent */
+  opacity: 1;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+
+/* ant table style */
+.ant-table-thead > tr > th {
+  background-color: #3b6fdf !important;
+  color: white !important;
+  /* border: none !important; */
+}
+
+  .ant-table-cell {
+    text-align: center;
+  }
+  
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    text-align: center !important;
+  }
+/* ant table style */
+
+
+/* BannerSlider.css */
+.banner-slider-container {
+  width: 100%;
+  height: 600px; 
+  overflow: hidden;
+  position: relative;
+}
+
+/* Adjust the height of the image gallery */
+.image-gallery {
+  height: 100% !important;
+}
+    
+.image-gallery-slides img {
+  width: 100% ;
+  height: 100% ;
+  object-fit: cover;
+}
+
+.image-gallery-content .image-gallery-slide .image-gallery-image{
+  max-height: 0% !important;
+}
+
+/* Optional: Adjust the height for smaller screens */
+@media (max-width: 768px) {
+  .banner-slider-container {
+    height: 300px; /* Adjust height for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-slider-container {
+    height: 200px; /* Adjust height for mobile screens */
+  }
+}
+
+
+/* BannerSlider.css */
+
+/* Container to control overall width and padding */
+/* .amenities-slider-container {
+  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
+  cursor: pointer;
+} */
+
+/* Swiper container */
+.amenities-swiper {
+  width: 100%;
+  height: 70px;
+}
+
+/* Individual amenity slides */
+.amenity-slide {
+  width: 80px !important;
+  padding: 0 12px;
+  height: 40px;
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Remove Swiper's default padding */
+.amenities-swiper .swiper-wrapper {
+  padding-left: 0px;
+}
+
+

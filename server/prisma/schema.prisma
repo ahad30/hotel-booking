@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  email             String?   @unique
+  password          String
+  phone             String    @unique
+  role              Role
+  name              String
+  isVerified        Boolean   @default(false)
+  verificationToken String?   @unique
+  tokenExpiresAt    DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Hotel {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String
+  description String
+  location    String
+  latitude    Float
+  longitude   Float
+  image       String
+  divisionId  String
+  cityId      String
+  areaId      String
+  amenities   String[]
+  ownerId     String   @db.ObjectId
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rooms Room[] @relation("HotelRooms")
+}
+
+model Room {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  hotelId String @db.ObjectId
+  hotel   Hotel  @relation("HotelRooms", fields: [hotelId], references: [id])
+
+  roomNumber  String
+  type        String
+  price       Float
+  capacity    Int
+  child       Int
+  roomQty     Int
+  // type        String 
+  images      String[]
+  amenities   String[]
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Booking {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  roomIds       String[]      @db.ObjectId
+  userId        String        @db.ObjectId
+  email         String
+  phone         String
+  bookingItem   Json[]
+  name          String
+  checkIn       DateTime
+  checkOut      DateTime
+  totalPrice    Float
+  status        String        @default("pending") // pending, confirmed, cancelled
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  paymentStatus PaymentStatus @default(pending)
+  transactionId String?       @unique
+  payment       Payment?      @relation("BookingToPayment")
+}
+
+model RoomBooking {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId String @db.ObjectId
+  roomId    String @db.ObjectId
+
+  // booking    Booking  @relation(fields: [bookingId], references: [id])
+  // room       Room     @relation(fields: [roomId], references: [id])
+}
+
+model Payment {
+  id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId  String        @unique @db.ObjectId
+  tranId     String        @unique
+  method     String // "bkash", "nagad", "sslcommerz", etc.
+  amount     Float
+  status     PaymentStatus @default(pending)
+  gatewayRes Json? // Save full response for debugging
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  booking Booking @relation("BookingToPayment", fields: [bookingId], references: [id])
+}
+
+model Slider {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String   @db.String
+  description String?  @db.String
+  imageUrl    String   @db.String
+  linkUrl     String?  @db.String
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum OrderStatus {
+  pending
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+model Notification {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  type      NotificationType
+  title     String
+  orderId   String? // optional order ID for order-related notifications
+  bookingId String? // optional booking ID for booking-related notifications
+
+  message   String
+  link      String? // link to open on click
+  data      Json? // optional payload
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMATION
+  BOOKING_CANCELLATION
+  ORDER_UPDATE
+  PROMOTION
+  REVIEW_REMINDER
+  GENERAL
+}
+
+model Division {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  serialId  Int
+  name      String
+  bn_name   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model District {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  serialId    Int
+  name        String
+  bn_name     String
+  division_id Int
+  divisionId  String?  @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Area {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  serialId    Int?
+  name        String
+  bn_name     String?
+  district_id Int?
+  district_name String
+  districtId  String?  @db.ObjectId
+  divisionId  String?  @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
