@@ -1,23 +1,24 @@
+import { lazy } from "react";
 import { MdNotificationImportant } from "react-icons/md";
 import { MdOutlineDashboardCustomize } from "react-icons/md";
 import { TfiLayoutSlider } from "react-icons/tfi";
-import DashboardStatistics from "../Pages/Dashboard/Admin/DashboardStatistics/DashboardStatistics";
+const DashboardStatistics = lazy(() => import("../Pages/Dashboard/Admin/DashboardStatistics/DashboardStatistics"));
 import { AiFillBoxPlot } from "react-icons/ai";
-import Sliders from "../Pages/Dashboard/Admin/Slider/Sliders";
+const Sliders = lazy(() => import("../Pages/Dashboard/Admin/Slider/Sliders"));
 import { CiShop } from "react-icons/ci";
 import { FaUsers } from "react-icons/fa";
-import Users from "../Pages/Dashboard/Admin/Customers/Users";
-import AddUser from "../Pages/Dashboard/Admin/Customers/AddUser/AddUser";
-import EditAdminProfile from "../Pages/Dashboard/Admin/Profile/EditAdminProfile";
-import Hotel from "../Pages/Dashboard/Admin/Hotel/Hotel";
-import AddHotel from "../Pages/Dashboard/Admin/Hotel/AddHotel";
-import EditHotel from "../Pages/Dashboard/Admin/Hotel/EditHotel";
-import ViewHotel from "../Pages/Dashboard/Admin/Hotel/ViewHotel";
-import EditRoom from "../Pages/Dashboard/Admin/Room/EditRoom";
-import Bookings from "../Pages/Dashboard/Admin/Bookings/Bookings";
-import AddNotification from "../Pages/Dashboard/Admin/AddNotification/AddNotification";
-import Area from "../Pages/Dashboard/Admin/Area/Area";
-import EditSlider from "../Pages/Dashboard/Admin/Slider/EditSlider";
+const Users = lazy(() => import("../Pages/Dashboard/Admin/Customers/Users"));
+const AddUser = lazy(() => import("../Pages/Dashboard/Admin/Customers/AddUser/AddUser"));
+const EditAdminProfile = lazy(() => import("../Pages/Dashboard/Admin/Profile/EditAdminProfile"));
+const Hotel = lazy(() => import("../Pages/Dashboard/Admin/Hotel/Hotel"));
+const AddHotel = lazy(() => import("../Pages/Dashboard/Admin/Hotel/AddHotel"));
+const EditHotel = lazy(() => import("../Pages/Dashboard/Admin/Hotel/EditHotel"));
+const ViewHotel = lazy(() => import("../Pages/Dashboard/Admin/Hotel/ViewHotel"));
+const EditRoom = lazy(() => import("../Pages/Dashboard/Admin/Room/EditRoom"));
+const Bookings = lazy(() => import("../Pages/Dashboard/Admin/Bookings/Bookings"));
+const AddNotification = lazy(() => import("../Pages/Dashboard/Admin/AddNotification/AddNotification"));
+const Area = lazy(() => import("../Pages/Dashboard/Admin/Area/Area"));
+const EditSlider = lazy(() => import("../Pages/Dashboard/Admin/Slider/EditSlider"));
 
 
 export const adminRoutes = [

@@ -1,97 +1,60 @@
-import React, { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { 
-  HomeIcon as HomeIconOutline, 
-  BellIcon as BellIconOutline, 
-  UserIcon as UserIconOutline,
-} from "@heroicons/react/24/outline";
-import { HomeIcon, BellIcon, UserIcon } from "@heroicons/react/24/solid";
-import { BellOutlined, CheckOutlined } from "@ant-design/icons";
-import { useAppSelector } from "../../redux/Hook/Hook";
-import { useCurrentUser } from "../../redux/Feature/auth/authSlice";
-import { useGetUserNotificationsQuery } from "../../redux/Feature/Admin/notification/notificationApi";
-import { Badge } from "antd";
+import { LuBell, LuCompass, LuHouse, LuUser } from "react-icons/lu";
+import { useUnreadCount } from "./Navbar";
 
+const tabs = [
+  { to: "/", label: "Home", icon: LuHouse, end: true },
+  { to: "/division", label: "Explore", icon: LuCompass },
+  { to: "/notification", label: "Alerts", icon: LuBell, badge: true },
+  { to: "/user/user-profile", label: "Profile", icon: LuUser },
+];
+
+// Pages with their own sticky bottom action bar hide the tab bar.
+const hiddenOn = ["/admin-login", "/login", "/register", "/checkout"];
+
+// Mobile tab bar.
 const BottomHeader = () => {
-    const user = useAppSelector(useCurrentUser);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const location = useLocation();
-    const isAdminLogin = location.pathname === '/admin-login';
-    
-    const {
-      data: notifications,
-      refetch,
-      isFetching,
-    } = useGetUserNotificationsQuery(user?.id);
-  
-    useEffect(() => {
-      if (notifications) {
-        setUnreadCount(notifications?.data?.filter((n) => !n.isRead).length);
-      }
-    }, [notifications]);
-  
+  const { pathname } = useLocation();
+  const unread = useUnreadCount();
+
+  if (hiddenOn.includes(pathname) || pathname.startsWith("/hotel-details")) return null;
+
   return (
-    <div className={`lg:hidden fixed  bottom-0 left-0 right-0 bg-white shadow-md border-t border-gray-200 z-50 ${isAdminLogin ? "hidden" : ""}`}>
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center">
-          <NavLink
-            to="/"
-            className={({ isActive }) => 
-              `flex flex-col items-center px-4 py-2 ${isActive ? "text-[#2563EB]" : "text-gray-600"}`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive ? (
-                  <HomeIcon className="w-6 h-6" />
-                ) : (
-                  <HomeIconOutline className="w-6 h-6" />
-                )}
-                <span className="text-xs mt-1">Home</span>
-              </>
-            )}
-          </NavLink>
-          
-          <NavLink
-            to="/notification"
-            className={({ isActive }) => 
-              `flex flex-col items-center px-4 py-2 ${isActive ? "text-[#2563EB]" : "text-gray-600"}`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Badge count={unreadCount} overflowCount={9} className="cursor-pointer">
-                  {isActive ? (
-                    <BellIcon className="text-xl w-6 h-6 text-[#2563EB]" />
-                  ) : (
-                    <BellIconOutline className="text-xl w-6 h-6" />
-                  )}
-                </Badge>
-                <span className="text-xs mt-1">Notifications</span>
-              </>
-            )}
-          </NavLink>
-          
-          <NavLink
-            to="/user/user-profile"
-            className={({ isActive }) => 
-              `flex flex-col items-center px-4 py-2 ${isActive ? "text-[#2563EB]" : "text-gray-600"}`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive ? (
-                  <UserIcon className="w-6 h-6" />
-                ) : (
-                  <UserIconOutline className="w-6 h-6" />
-                )}
-                <span className="text-xs mt-1">Profile</span>
-              </>
-            )}
-          </NavLink>
-        </div>
-      </div>
-    </div>
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-3 bottom-3 z-50 rounded-3xl border border-ink-100 bg-white/90 shadow-lift backdrop-blur-xl lg:hidden"
+      style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <ul className="grid grid-cols-4">
+        {tabs.map(({ to, label, icon: Icon, end, badge }) => (
+          <li key={to}>
+            <NavLink
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition ${
+                  isActive ? "text-brand-700" : "text-ink-400"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={`relative grid h-8 w-12 place-items-center rounded-full transition ${isActive ? "bg-brand-100" : ""}`}>
+                    <Icon className="h-5 w-5" />
+                    {badge && unread > 0 && (
+                      <span className="absolute right-1.5 top-0 grid h-4 min-w-[16px] place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">
+                        {unread > 9 ? "9+" : unread}
+                      </span>
+                    )}
+                  </span>
+                  {label}
+                </>
+              )}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 };
 

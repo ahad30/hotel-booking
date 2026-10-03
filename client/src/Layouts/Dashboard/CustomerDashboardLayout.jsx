@@ -1,9 +1,10 @@
+import { Suspense } from "react";
+import PageLoader from "../../components/ui/PageLoader";
 import { Outlet, useLocation } from "react-router-dom";
 
 import CustomerDashboardSidebar from "./CustomerDashboardSidebar";
 import { FiMenu, FiX } from "react-icons/fi";
 import { useEffect, useState } from "react";
-import Header from "../../common/Header/Header";
 import BottomHeader from "../../common/Header/BottomHeader";
 import UserNavbar from "./UserNavbar";
 
@@ -40,7 +41,7 @@ const CustomerDashboardLayout = () => {
       <div
      
        >
-        <Outlet></Outlet>
+        <Suspense fallback={<PageLoader />}><Outlet /></Suspense>
       </div>
     </div>
      <BottomHeader/>
