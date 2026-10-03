@@ -1,0 +1,50 @@
+/* Restyles the shared antd-based form fields inside the auth and checkout pages only. */
+.auth-form .ant-form-item-label > label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #424b5c;
+}
+.auth-form .ant-input,
+.auth-form .ant-input-affix-wrapper {
+  height: 48px;
+  border-radius: 14px;
+  border-color: #d5dae2;
+  padding-inline: 16px;
+  font-size: 0.9375rem;
+}
+.auth-form .ant-input-affix-wrapper .ant-input {
+  height: auto;
+  padding-inline: 0;
+}
+.auth-form .ant-input:hover,
+.auth-form .ant-input-affix-wrapper:hover {
+  border-color: #a78bfa;
+}
+.auth-form .ant-input:focus,
+.auth-form .ant-input-focused,
+.auth-form .ant-input-affix-wrapper-focused {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px #ede9fe;
+}
+.auth-form .ant-form-item {
+  margin-bottom: 18px;
+}
+.auth-form button[type="submit"] {
+  width: 100%;
+  height: 52px;
+  border-radius: 9999px;
+  background: #7c3aed;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.55);
+  transition: background-color 0.2s, transform 0.1s;
+}
+.auth-form button[type="submit"]:hover {
+  background: #6d28d9;
+}
+.auth-form button[type="submit"]:active {
+  transform: scale(0.98);
+}
+.auth-form button[type="submit"]:disabled {
+  background: #a78bfa;
+}

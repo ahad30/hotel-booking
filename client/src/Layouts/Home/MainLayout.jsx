@@ -1,29 +1,40 @@
-import { Outlet, useLocation } from "react-router-dom";
-import Header from "../../common/Header/Header";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { Outlet, ScrollRestoration, useLocation } from "react-router-dom";
+import Navbar from "../../common/Header/Navbar";
 import BottomHeader from "../../common/Header/BottomHeader";
-import { useState } from "react";
+import Footer from "../../common/Footer/Footer";
+import PageLoader from "../../components/ui/PageLoader";
+
+// Pages that were not redesigned as full-width layouts get a padded container.
+const contained = ["/notification", "/privacy-policy", "/verify", "/home-division"];
+const noFooter = ["/login", "/register", "/admin-login", "/checkout"];
 
 const MainLayout = () => {
-  const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [divisionId, setDivisionId] = useState('');
-  const [cityId, setCityId] = useState('');
+  const { pathname } = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFiltersState] = useState({ divisionId: "", cityId: "" });
+
+  const setFilters = useCallback((divisionId = "", cityId = "") => setFiltersState({ divisionId, cityId }), []);
+
+  const context = useMemo(
+    () => ({ searchQuery, setSearchQuery, ...filters, setFilters }),
+    [searchQuery, filters, setFilters]
+  );
+
+  const isHome = pathname === "/";
+  const isContained = contained.some((p) => pathname.startsWith(p));
 
   return (
-    <div>
-      <Header
-        onSearch={setSearchQuery}
-        onFilterChange={(division, city) => {
-          setDivisionId(division);
-          setCityId(city);
-        }}
-      />
-
-      <div className={`w-[95%] lg:max-w-[1480px] mx-auto ${["/cancel", "/success", "/checkout"].includes(location.pathname) ? "w-full" : ""}`}>
-        <Outlet context={{ searchQuery, divisionId, cityId }} />
-      </div>
-
+    <div className="flex min-h-screen flex-col bg-white">
+      <Navbar />
+      <main className={`flex-1 ${isHome ? "" : "pt-[72px]"} ${isContained ? "container-x py-8 pb-28 lg:pb-12" : ""}`}>
+        <Suspense fallback={<PageLoader />}>
+          <Outlet context={context} />
+        </Suspense>
+      </main>
+      {!noFooter.includes(pathname) && <Footer />}
       <BottomHeader />
+      <ScrollRestoration />
     </div>
   );
 };

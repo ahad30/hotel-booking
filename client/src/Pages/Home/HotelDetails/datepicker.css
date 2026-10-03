@@ -1,0 +1,53 @@
+/* Brand styling for react-datepicker on the hotel page. */
+.behb-datepicker .react-datepicker {
+  font-family: inherit;
+  border: 1px solid #eceef2;
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 4px rgba(16, 24, 40, 0.04), 0 18px 40px -12px rgba(16, 24, 40, 0.22);
+  overflow: hidden;
+}
+.behb-datepicker .react-datepicker__header {
+  background: #fff;
+  border-bottom: 1px solid #eceef2;
+  padding-top: 12px;
+}
+.behb-datepicker .react-datepicker__current-month {
+  font-weight: 700;
+  color: #0b1020;
+}
+.behb-datepicker .react-datepicker__day-name {
+  color: #8592a6;
+  font-weight: 600;
+}
+.behb-datepicker .react-datepicker__day {
+  border-radius: 9999px;
+  font-weight: 500;
+}
+.behb-datepicker .react-datepicker__day:hover {
+  border-radius: 9999px;
+  background: #ede9fe;
+}
+.behb-datepicker .react-datepicker__day--in-range,
+.behb-datepicker .react-datepicker__day--in-selecting-range {
+  background: #ede9fe !important;
+  color: #5b21b6 !important;
+}
+.behb-datepicker .react-datepicker__day--selected,
+.behb-datepicker .react-datepicker__day--range-start,
+.behb-datepicker .react-datepicker__day--range-end,
+.behb-datepicker .react-datepicker__day--keyboard-selected {
+  background: #7c3aed !important;
+  color: #fff !important;
+}
+.behb-datepicker .react-datepicker__day--disabled {
+  color: #d5dae2;
+}
+.behb-datepicker .react-datepicker__triangle {
+  display: none;
+}
+.behb-datepicker .react-datepicker-wrapper {
+  width: 100%;
+}
+.behb-datepicker .react-datepicker-popper {
+  z-index: 60;
+}

@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import PageLoader from "../../components/ui/PageLoader";
 import { Outlet } from "react-router-dom";
 import DashboardSidebarTwo from "./DashboardSidebarTwo";
 import { useState } from "react";
@@ -37,7 +39,7 @@ const DashboardLayout = () => {
           }}
           className=" py-12 bg-[#F3F5F7] px-5 w-full"
         >
-          <Outlet></Outlet>
+          <Suspense fallback={<PageLoader />}><Outlet /></Suspense>
         </div>
       </div>
     </div>

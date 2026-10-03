@@ -1,210 +1,126 @@
 import { useEffect, useState } from "react";
-import { Link, useOutletContext } from "react-router-dom";
-import SectionTitle from "../../../components/SectionTitle/SectionTitle";
-import ProductsSkeleton from "../../../components/Skeleton/ProductsSkeleton";
-import { IoLocationOutline } from "react-icons/io5";
-import { FaList, FaTh } from "react-icons/fa";
-import Image1 from "../../../../public/image.png";
+import { useOutletContext } from "react-router-dom";
+import { LuLayoutGrid, LuList, LuRefreshCw, LuSearchX, LuX } from "react-icons/lu";
 import { useGetHotelsBySearchQuery } from "../../../redux/Feature/Admin/hotel/hotelApi";
+import { useGetDistrictsByDivisionQuery, useGetDivisionsQuery } from "../../../redux/Feature/User/place/placeApi";
+import HotelCard, { HotelCardSkeleton } from "../../../components/ui/HotelCard";
+import SectionHeader from "../SectionHeader";
+import { pluralize } from "../../../utils/format";
+
+const VIEW_KEY = "behb:hotel-view";
+
+const readView = () => {
+  try {
+    return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "grid";
+  } catch {
+    return "grid";
+  }
+};
+
+const FilterChip = ({ label, onClear }) => (
+  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 py-1 pl-3 pr-1 text-sm font-semibold text-brand-800 ring-1 ring-brand-100">
+    {label}
+    <button onClick={onClear} aria-label={`Remove ${label}`} className="grid h-6 w-6 place-items-center rounded-full transition hover:bg-brand-100">
+      <LuX className="h-3.5 w-3.5" />
+    </button>
+  </span>
+);
 
 const AllHotel = () => {
-  const { searchQuery, divisionId, cityId } = useOutletContext();
-  const [showSkeleton, setShowSkeleton] = useState(true);
-  const [viewMode, setViewMode] = useState('grid'); 
-  const { data, error, isLoading, isFetching } = useGetHotelsBySearchQuery({
-    name: searchQuery,
-    divisionId,
-    cityId
-  });
+  const { searchQuery, setSearchQuery, divisionId, cityId, setFilters } = useOutletContext();
+  const [view, setView] = useState(readView);
 
   useEffect(() => {
-    if (isFetching || isLoading) {
-      setShowSkeleton(true);
-    } else {
-      setShowSkeleton(false);
+    try {
+      localStorage.setItem(VIEW_KEY, view);
+    } catch {
+      /* storage unavailable: the choice just won't persist */
     }
-  }, [isFetching, isLoading]);
+  }, [view]);
 
-  const noHotelsFound = !isLoading && !showSkeleton && data?.data?.length === 0 &&
-    (searchQuery.trim() !== "" || cityId || divisionId);
+  const { data, isFetching, isError, refetch } = useGetHotelsBySearchQuery({ name: searchQuery, divisionId, cityId });
+  const { data: divisions } = useGetDivisionsQuery();
+  const { data: districts } = useGetDistrictsByDivisionQuery(divisionId, { skip: !divisionId });
+
+  const hotels = data?.data || [];
+  const hasFilters = Boolean(searchQuery || divisionId || cityId);
+  const divisionName = divisions?.data?.find((d) => String(d.serialId) === String(divisionId))?.name;
+  const districtName = districts?.data?.find((d) => String(d.serialId) === String(cityId))?.name;
+
+  const clearAll = () => {
+    setSearchQuery("");
+    setFilters("", "");
+  };
 
   return (
-    <div className="pb-[80px]">
-      <SectionTitle title="Check our all hotels" />
-      
-      {/* View Mode Toggle */}
-      <div className="hidden md:flex justify-end mb-4 mr-4">
-        <div className="flex bg-white rounded-lg border border-gray-200 p-1">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-md transition-colors ${
-              viewMode === 'grid' 
-                ? 'bg-blue-500 text-white' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <FaTh className="text-sm" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-md transition-colors ${
-              viewMode === 'list' 
-                ? 'bg-blue-500 text-white' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <FaList className="text-sm" />
-          </button>
-        </div>
-      </div>
+    <section id="hotels" className="container-x scroll-mt-24 pt-20 sm:pt-28">
+      <SectionHeader
+        eyebrow="Stays"
+        title={hasFilters ? "Hotels matching your search" : "Handpicked hotels for you"}
+        subtitle={isFetching ? "Finding hotels…" : `${pluralize(hotels.length, "hotel")} available to book`}
+        action={
+          <div className="flex shrink-0 rounded-full bg-ink-100 p-1" role="group" aria-label="Layout">
+            {[
+              { id: "grid", Icon: LuLayoutGrid, label: "Grid view" },
+              { id: "list", Icon: LuList, label: "List view" },
+            ].map(({ id, Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => setView(id)}
+                aria-label={label}
+                aria-pressed={view === id}
+                className={`grid h-9 w-11 place-items-center rounded-full transition ${
+                  view === id ? "bg-white text-ink-950 shadow-soft" : "text-ink-500 hover:text-ink-800"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            ))}
+          </div>
+        }
+      />
 
-      {/* Show Skeleton While Loading */}
-      {(isLoading || showSkeleton) && <ProductsSkeleton hotelData={data?.data} viewMode={viewMode} />}
-
-      {/* Show "No hotels found" message */}
-      {noHotelsFound && (
-        <div className="text-center text-[13px] md:text-xl font-bold text-red-500">
-          No hotel found for the given criteria.
+      {hasFilters && (
+        <div className="mt-6 flex flex-wrap items-center gap-2">
+          {searchQuery && <FilterChip label={`“${searchQuery}”`} onClear={() => setSearchQuery("")} />}
+          {divisionId && <FilterChip label={divisionName || "Division"} onClear={() => setFilters("", "")} />}
+          {cityId && <FilterChip label={districtName || "District"} onClear={() => setFilters(divisionId, "")} />}
+          <button onClick={clearAll} className="ml-1 text-sm font-semibold text-ink-500 underline-offset-4 hover:text-ink-900 hover:underline">
+            Clear all
+          </button>
         </div>
       )}
-      
-      {/* Hotels Container */}
-      <div className={`${
-        viewMode === 'grid' 
-          ? 'lg:max-w-[98%] grid grid-cols-2 lg:grid-cols-3 gap-4 mx-auto' 
-          : ' mx-auto space-y-4'
-      }`}>
-        {!isLoading && !showSkeleton && data?.data?.map((hotel, index) => (
-          <Link 
-            to={`/hotel-details/${hotel?.id}`} 
-            key={index}
-            className={`block ${
-              viewMode === 'list' 
-                ? 'flex flex-row h-48' 
-                : 'flex flex-col'
-            } rounded-lg border border-gray-200 shadow-sm overflow-hidden bg-white hover:shadow-md transition-shadow`}
-          >
-            {/* Image */}
-            <div className={`${
-              viewMode === 'list' 
-                ? 'w-1/3 h-full' 
-                : 'h-[110px] md:h-[300px]'
-            } relative`}>
-              <img
-                src={hotel?.image || Image1}
-                alt={hotel.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
 
-            {/* Content */}
-            <div className={`${
-              viewMode === 'list' 
-                ? 'w-2/3 p-4 flex flex-col justify-between' 
-                : 'flex-1 px-2 py-1 md:px-4 md:py-4'
-            }`}>
-              <div className={`${
-                viewMode === 'list' 
-                  ? 'flex flex-col h-full justify-between' 
-                  : 'flex flex-col lg:gap-8'
-              }`}>
-                {/* Hotel Info */}
-                <div className={`${
-                  viewMode === 'list' 
-                    ? 'space-y-2' 
-                    : 'md:space-y-4 lg:px-3 py-2 md:py-5 lg:py-0'
-                }`}>
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-2">
-                    <h2 className={`font-semibold text-[#1A1A1A] ${
-                      viewMode === 'list' 
-                        ? 'text-lg md:text-xl' 
-                        : 'text-[10px] md:text-2xl'
-                    }`}>
-                      {hotel.name}
-                    </h2>
-                  </div>
-
-                  <div className="flex items-center gap-1 text-[#666666] md:mb-4">
-                    <IoLocationOutline className="text-lg text-blue-500" />
-                    <span className={`${
-                      viewMode === 'list' 
-                        ? 'text-sm' 
-                        : 'text-[8px] md:text-[14px]'
-                    }`}>
-                      {hotel.location}
-                    </span>
-                  </div>
-
-                  {/* Amenities - Show more in list view */}
-                  {viewMode === 'list' && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {hotel.amenities.slice(0, 4).map((amenity, i) => (
-                        <span
-                          key={i}
-                          className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600"
-                        >
-                          {amenity}
-                        </span>
-                      ))}
-                      {hotel.amenities.length > 4 && (
-                        <span className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
-                          +{hotel.amenities.length - 4} more
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom Section */}
-                <div className={`${
-                  viewMode === 'list' 
-                    ? 'flex items-center justify-between mt-auto' 
-                    : 'md:min-w-[300px] md:space-y-5'
-                }`}>
-                  {/* Amenities - Grid view only */}
-                  {viewMode === 'grid' && (
-                    <div className="md:flex hidden gap-2">
-                      {hotel.amenities.slice(0, 2).map((tag, i) => (
-                        <span
-                          key={i}
-                          className={`px-3 py-1 rounded-full text-sm hidden lg:block ${
-                            tag === "Best"
-                              ? "bg-[#B8BBFF40] text-[#5054D9]"
-                              : "bg-[#FFD18140] text-[#F99F1D]"
-                          }`}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      <span className="px-3 py-1 rounded-full text-sm hidden lg:block bg-[#FFD18140] text-[#F99F1D]">
-                        + more..
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Price and Button */}
-                  {viewMode === 'list' && hotel.rooms && hotel.rooms.length > 0 && (
-                    <div className="text-lg font-bold text-blue-600">
-                      {hotel.rooms[0]?.price} Tk/night
-                    </div>
-                  )}
-                  
-                  <div className={`${viewMode === 'list' ? 'w-auto' : 'w-full'}`}>
-                    <button className={`text-[#5054D9] font-medium transition ${
-                      viewMode === 'list' 
-                        ? 'px-4 py-2 rounded-lg border border-[#5054D9] hover:bg-[#5054D9] hover:text-white' 
-                        : 'text-xs lg:text-base py-1 lg:py-3 w-full rounded-lg border border-[#5054D9] px-1 mb-4'
-                    }`}>
-                      {viewMode === 'list' ? 'View Details' : 'Choose Room'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
+      <div className={`mt-8 ${view === "grid" ? "grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3" : "flex flex-col gap-5"}`}>
+        {isFetching
+          ? Array.from({ length: 6 }).map((_, i) => <HotelCardSkeleton key={i} layout={view} />)
+          : hotels.map((hotel, i) => <HotelCard key={hotel.id} hotel={hotel} layout={view} index={i} />)}
       </div>
-    </div>
+
+      {!isFetching && isError && (
+        <div className="card mt-4 flex flex-col items-center gap-4 px-6 py-14 text-center">
+          <p className="text-lg font-bold text-ink-900">We couldn&apos;t load hotels.</p>
+          <button onClick={refetch} className="btn-primary">
+            <LuRefreshCw className="h-4 w-4" /> Try again
+          </button>
+        </div>
+      )}
+
+      {!isFetching && !isError && hotels.length === 0 && (
+        <div className="card flex flex-col items-center gap-3 px-6 py-16 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+            <LuSearchX className="h-7 w-7" />
+          </span>
+          <p className="text-lg font-bold text-ink-900">No hotels match your search</p>
+          <p className="max-w-sm text-sm text-ink-500">Try another name, or widen the area by removing a filter.</p>
+          {hasFilters && (
+            <button onClick={clearAll} className="btn-primary mt-2">
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
+    </section>
   );
 };
 

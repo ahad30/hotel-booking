@@ -1,25 +1,17 @@
-import { useEffect, useState } from "react";
-import AllHotel from "./AllHotel/AllHotel";
+import Hero from "./Hero/Hero";
 import BannerSlider from "./BannerSlider/BannerSlider";
-import Division from "./Home-Division/HomeDivision";
+import Destinations from "./Destinations/Destinations";
+import AllHotel from "./AllHotel/AllHotel";
+import WhyUs from "./WhyUs/WhyUs";
 
-
-const Home = () => {
-
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-
-  return (
-    <div className="">
-       {/* <Division/> */}
-       <BannerSlider />
-       <AllHotel/>
-
-    </div>
-  );
-};
+const Home = () => (
+  <>
+    <Hero />
+    <AllHotel />
+    <BannerSlider />
+    <Destinations />
+    <WhyUs />
+  </>
+);
 
 export default Home;
