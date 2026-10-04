@@ -126,6 +126,10 @@ class BookingService {
         const start = new Date(checkIn);
         const end = new Date(checkOut);
 
+        // Unpaid checkouts hold their rooms for 30 minutes; after that, only
+        // paid or admin-confirmed bookings count. Failed/cancelled never do.
+        const holdCutoff = new Date(Date.now() - 30 * 60 * 1000);
+
         const overlappingBookings = await this.prisma.booking.findMany({
             where: {
                 roomIds: {
@@ -133,7 +137,16 @@ class BookingService {
                 },
                 AND: [
                     { checkIn: { lt: end } },
-                    { checkOut: { gt: start } }
+                    { checkOut: { gt: start } },
+                    { status: { not: "cancelled" } },
+                    { paymentStatus: { not: "failed" } },
+                    {
+                        OR: [
+                            { paymentStatus: "paid" },
+                            { status: "confirmed" },
+                            { createdAt: { gte: holdCutoff } },
+                        ],
+                    },
                 ]
             }
         });

@@ -24,6 +24,8 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+// SSLCommerz posts its payment callbacks as URL-encoded forms.
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
