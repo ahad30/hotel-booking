@@ -63,7 +63,7 @@ const Checkout = () => {
         toast.error("Booking created, but payment URL not received!");
       }
     } catch (err) {
-      toast.error("Failed to book, please try again.");
+      toast.error(err?.data?.message || "Failed to book, please try again.");
     }
   };
 

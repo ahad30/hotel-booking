@@ -193,7 +193,7 @@ const HotelDetails = () => {
           toast.success(`${room.type} room added to your stay.`);
         }
       } else {
-        toast.warning("That room isn't available for your dates.");
+        toast.warning(res?.data?.message || "That room isn't available for your dates.");
       }
     } catch (err) {
       toast.error("Couldn't check availability. Please try again.");

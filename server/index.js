@@ -44,7 +44,8 @@ app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err);
   
   if (res && !res.headersSent) {
-    res.status(err.status || 500).json({
+    // ApiError sets statusCode; other errors may set status.
+    res.status(err.statusCode || err.status || 500).json({
       success: false,
       message: err.message || 'Internal Server Error',
     });
