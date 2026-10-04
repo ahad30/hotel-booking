@@ -31,7 +31,9 @@ const Login = () => {
 
     if (loginData?.success) {
       dispatch(setUser({ token: loginData.token, user: loginData.user }));
-      if (loginData?.user?.role === "user") {
+      if (loginData?.user?.role === "admin") {
+        navigate("/admin/home");
+      } else {
         navigate(location?.state?.from || "/");
       }
     }

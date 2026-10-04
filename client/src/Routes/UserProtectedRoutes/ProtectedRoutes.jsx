@@ -1,13 +1,12 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import {
-  logout,
-  useCurrentToken,
-  useCurrentUser,
-} from "../../redux/Feature/auth/authSlice";
+import { logout, useCurrentToken, useCurrentUser } from "../../redux/Feature/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/Hook/Hook";
 import LoadingPage from "../../components/LoadingPage";
+import SessionCheckFailed from "../SessionCheckFailed";
 import { useGetUserQuery } from "../../redux/Feature/auth/authApi";
+
+const homeForRole = (role) => (role === "admin" ? "/admin/home" : "/");
 
 const ProtectedRoutes = ({ children, role }) => {
   const dispatch = useAppDispatch();
@@ -15,7 +14,11 @@ const ProtectedRoutes = ({ children, role }) => {
   const [loading, setLoading] = useState(true);
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
-  const { data, isLoading, isFetching, refetch } = useGetUserQuery();
+  const { data, isLoading, isFetching, isError, refetch } = useGetUserQuery();
+
+  // Matched by id: email is optional on accounts, so it can't identify a user.
+  const loggedInUser = data?.data?.find((u) => u.id === user?.id);
+  const accountMissing = Boolean(data?.data) && !isFetching && !loading && !loggedInUser;
 
   useEffect(() => {
     if (user && token) {
@@ -24,32 +27,34 @@ const ProtectedRoutes = ({ children, role }) => {
     }
   }, [user, token, refetch]);
 
-  // Redirect to login if no token or user
-  if (!token || token == null || user == null) {
-    return (
-      <Navigate
-        to="/login"
-        state={{ from: location.pathname }} // Pass the current path to redirect back after login
-        replace
-      />
-    );
+  // Only a deleted or unknown account ends the session.
+  useEffect(() => {
+    if (accountMissing) dispatch(logout());
+  }, [accountMissing, dispatch]);
+
+  if (!token || user == null) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // Show loading spinner while fetching data
   if (isLoading || isFetching || loading) {
     return <LoadingPage />;
   }
 
-  // Find the logged-in user from the fetched data
-  const loggedInUser = data?.data?.find((u) => u.email === user.email);
+  // The user list couldn't be loaded (API down, offline): keep the session.
+  if (isError || !data?.data) {
+    return <SessionCheckFailed onRetry={refetch} />;
+  }
 
-  // Logout and redirect if the user role doesn't match
-  if (!loggedInUser || loggedInUser.role !== role) {
-    dispatch(logout());
+  if (!loggedInUser) {
     return <Navigate to="/login" replace />;
   }
 
-  // Render the protected component
+  // Signed in with a different role (e.g. an admin opening a customer page):
+  // send them to their own area instead of logging them out.
+  if (loggedInUser.role !== role) {
+    return <Navigate to={homeForRole(loggedInUser.role)} replace />;
+  }
+
   return children;
 };
 

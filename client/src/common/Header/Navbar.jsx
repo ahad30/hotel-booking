@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { LuBell, LuChevronDown, LuHistory, LuLogOut, LuUser } from "react-icons/lu";
+import { LuBell, LuChevronDown, LuHistory, LuLayoutDashboard, LuLogOut, LuUser } from "react-icons/lu";
 import Logo from "../../components/ui/Logo";
 import { useAppDispatch, useAppSelector } from "../../redux/Hook/Hook";
 import { logout, useCurrentToken, useCurrentUser } from "../../redux/Feature/auth/authSlice";
@@ -9,7 +9,7 @@ import { useGetUserNotificationsQuery } from "../../redux/Feature/Admin/notifica
 
 export const useUnreadCount = () => {
   const user = useAppSelector(useCurrentUser);
-  const { data } = useGetUserNotificationsQuery(user?.id, { skip: !user?.id });
+  const { data } = useGetUserNotificationsQuery(user?.id, { skip: !user?.id || user?.role !== "user" });
   return data?.data?.filter((n) => !n.isRead).length || 0;
 };
 
@@ -30,11 +30,15 @@ const UserMenu = ({ user, onLogout, transparent }) => {
   }, [open]);
 
   const initial = (user?.name || "G").trim().charAt(0).toUpperCase();
-  const items = [
-    { to: "/user/user-booking", label: "My bookings", icon: LuHistory },
-    { to: "/user/user-profile", label: "Profile", icon: LuUser },
-    { to: "/notification", label: "Notifications", icon: LuBell },
-  ];
+  // Customer pages are off-limits to admins, so they get the dashboard instead.
+  const items =
+    user?.role === "admin"
+      ? [{ to: "/admin/home", label: "Admin dashboard", icon: LuLayoutDashboard }]
+      : [
+          { to: "/user/user-booking", label: "My bookings", icon: LuHistory },
+          { to: "/user/user-profile", label: "Profile", icon: LuUser },
+          { to: "/notification", label: "Notifications", icon: LuBell },
+        ];
 
   return (
     <div className="relative" ref={ref}>
@@ -165,7 +169,18 @@ const Navbar = () => {
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {isLoggedIn && (
+          {isLoggedIn && user?.role === "admin" && (
+            <Link
+              to="/admin/home"
+              className={`hidden rounded-full px-4 py-2 text-sm font-semibold transition sm:block ${
+                transparent ? "bg-white/15 text-white hover:bg-white/25" : "bg-brand-50 text-brand-700 hover:bg-brand-100"
+              }`}
+            >
+              Dashboard
+            </Link>
+          )}
+
+          {isLoggedIn && user?.role === "user" && (
             <Link
               to="/notification"
               aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}
