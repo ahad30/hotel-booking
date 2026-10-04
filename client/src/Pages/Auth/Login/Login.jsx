@@ -17,12 +17,17 @@ const Login = () => {
 
   const [login, { isLoading, error, isError, isSuccess, data: loginData }] = useLoginMutation();
 
+  // One login page for every role: each lands in its own area, or back on the
+  // page that sent them here if that page belongs to their role.
+  const destinationFor = (role) => {
+    const from = location?.state?.from;
+    const isAdminPath = from?.startsWith("/admin");
+    if (role === "admin") return isAdminPath ? from : "/admin/home";
+    return from && !isAdminPath ? from : "/";
+  };
+
   useEffect(() => {
-    if (token && user?.role === "admin") {
-      navigate("/admin/home");
-    } else if (token && user?.role === "user") {
-      navigate("/");
-    }
+    if (token && user?.role) navigate(destinationFor(user.role), { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -31,18 +36,14 @@ const Login = () => {
 
     if (loginData?.success) {
       dispatch(setUser({ token: loginData.token, user: loginData.user }));
-      if (loginData?.user?.role === "admin") {
-        navigate("/admin/home");
-      } else {
-        navigate(location?.state?.from || "/");
-      }
+      navigate(destinationFor(loginData?.user?.role), { replace: true });
     }
   };
 
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Log in to book rooms and manage your stays."
+      subtitle="Log in to book rooms and manage your stays. Admins sign in here too."
       footer={
         <>
           New to BEHB?{" "}

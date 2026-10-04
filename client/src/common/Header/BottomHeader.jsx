@@ -19,7 +19,7 @@ const adminTabs = [
 ];
 
 // Pages with their own sticky bottom action bar hide the tab bar.
-const hiddenOn = ["/admin-login", "/login", "/register", "/checkout"];
+const hiddenOn = ["/login", "/register", "/checkout"];
 
 // Mobile tab bar.
 const BottomHeader = () => {

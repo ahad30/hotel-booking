@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "../Layouts/Home/MainLayout";
 import Home from "../Pages/Home/Home";
 import ErrorPage from "../common/ErrorPage/ErrorPage";
@@ -18,7 +18,6 @@ const Success = lazy(() => import("../Pages/Success/Success"));
 const PaymentError = lazy(() => import("../Pages/Error/PaymentError"));
 const Login = lazy(() => import("../Pages/Auth/Login/Login"));
 const Register = lazy(() => import("../Pages/Auth/Register/Register"));
-const AdminLogin = lazy(() => import("../Pages/Auth/AdminLogin/AdminLogin"));
 const Verify = lazy(() => import("../Pages/Verify/Verify"));
 const Notification = lazy(() => import("../Pages/Notification/Notification"));
 const HomeDivision = lazy(() => import("../Pages/Home/Home-Division/HomeDivision"));
@@ -74,7 +73,8 @@ export const routes = createBrowserRouter([
       { path: "/cancel", element: <PaymentError /> },
       { path: "/hotel-details/:id", element: <HotelDetails /> },
       { path: "/login", element: <Login /> },
-      { path: "/admin-login", element: <AdminLogin /> },
+      // Admins and customers share one login page; old links still work.
+      { path: "/admin-login", element: <Navigate to="/login" replace /> },
       { path: "/register", element: <Register /> },
       { path: "/verify/:token", element: <Verify /> },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },

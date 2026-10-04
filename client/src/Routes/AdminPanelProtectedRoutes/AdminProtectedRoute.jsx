@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { logout, useCurrentToken, useCurrentUser } from "../../redux/Feature/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/Hook/Hook";
 import LoadingPage from "../../components/LoadingPage";
@@ -8,6 +8,7 @@ import { useGetUserQuery } from "../../redux/Feature/auth/authApi";
 
 const AdminProtectedRoute = ({ children }) => {
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
@@ -30,7 +31,7 @@ const AdminProtectedRoute = ({ children }) => {
   }, [accountMissing, dispatch]);
 
   if (!token || user == null) {
-    return <Navigate to="/admin-login" replace />;
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
   if (isLoading || isFetching || loading) {
@@ -43,7 +44,7 @@ const AdminProtectedRoute = ({ children }) => {
   }
 
   if (!loggedInUser) {
-    return <Navigate to="/admin-login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // A customer opening the dashboard is sent home, not logged out.
