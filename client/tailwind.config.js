@@ -11,7 +11,8 @@ export default {
         Poppins: fontStack,
       },
       colors: {
-        primary: "#FD3D57",
+        // Used by older dashboard pages (bg-primary buttons); aligned with the brand violet.
+        primary: "#7c3aed",
         secondary: "#232830",
         // Brand palette, taken from the BEHB logo gradient.
         brand: {

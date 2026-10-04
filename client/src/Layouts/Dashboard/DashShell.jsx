@@ -157,6 +157,12 @@ const DashShell = ({ groups, subtitle, accountLinks = [] }) => {
   }, [collapsed]);
 
   const current = groups.flatMap((g) => g.items).find((i) => pathname === i.to || pathname.startsWith(`${i.to}/`));
+  // Pages outside the menu (add-hotel, edit-room/:id, …) get a title from the URL.
+  const fallbackTitle = (() => {
+    const part = pathname.split("/").filter((p) => p && !/^[a-f0-9]{24}$/i.test(p)).pop() || "";
+    const text = part.replace(/[-_]/g, " ");
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  })();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -203,12 +209,12 @@ const DashShell = ({ groups, subtitle, accountLinks = [] }) => {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-ink-100 bg-white/80 px-4 backdrop-blur-xl sm:px-6">
+          <header className="relative z-30 flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-ink-100 bg-white/80 px-4 backdrop-blur-xl sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <button onClick={() => setDrawer(true)} aria-label="Open menu" className="grid h-10 w-10 place-items-center rounded-full bg-ink-100 text-ink-700 lg:hidden">
                 <LuMenu className="h-5 w-5" />
               </button>
-              <p className="truncate text-base font-bold text-ink-950">{current?.label || "Dashboard"}</p>
+              <p className="truncate text-base font-bold text-ink-950">{current?.label || fallbackTitle || "Dashboard"}</p>
             </div>
             <div className="flex items-center gap-2">
               <Link to="/" className="btn-ghost hidden py-2 sm:inline-flex">
@@ -218,7 +224,8 @@ const DashShell = ({ groups, subtitle, accountLinks = [] }) => {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto">
+          {/* relative: keeps absolutely positioned descendants (e.g. sr-only chart tables) inside the scroll area */}
+          <main className="dash-main relative flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />

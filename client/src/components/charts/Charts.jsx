@@ -100,7 +100,7 @@ export const StackedBar = ({ segments, caption }) => {
   const total = segments.reduce((s, x) => s + x.value, 0);
 
   return (
-    <figure>
+    <figure className="relative">
       <div className="relative">
         <div className="flex h-6 gap-[2px] overflow-hidden rounded-[4px] bg-ink-100">
           {total > 0 &&
@@ -166,7 +166,7 @@ export const StackedBar = ({ segments, caption }) => {
 export const BarList = ({ items, format = (v) => v, color = "#7c3aed", caption }) => {
   const max = Math.max(...items.map((i) => i.value), 0) || 1;
   return (
-    <figure>
+    <figure className="relative">
       <ul className="space-y-4">
         {items.map((item) => (
           <li key={item.label} title={`${item.label}: ${format(item.value)}`}>

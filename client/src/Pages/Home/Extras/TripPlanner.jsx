@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { LuArrowRight, LuCalculator } from "react-icons/lu";
 import { useAllHotels } from "../../../utils/useAllHotels";
 import Stepper from "../../../components/ui/Stepper";
+import SelectField from "../../../components/ui/SelectField";
 import { formatTaka, pluralize } from "../../../utils/format";
 import SectionHeader from "../SectionHeader";
 
@@ -27,8 +28,6 @@ const TripPlanner = () => {
 
   const total = room ? room.price * nights * rooms : 0;
   const guests = room ? (room.capacity + room.child) * rooms : 0;
-  const selectClass =
-    "w-full rounded-2xl border border-ink-200 bg-white px-4 py-3 text-sm font-semibold outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100";
 
   return (
     <section className="container-x pt-20 sm:pt-28">
@@ -43,26 +42,25 @@ const TripPlanner = () => {
           ) : (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block">
+                <div>
                   <span className="mb-1.5 block text-[13px] font-semibold text-ink-700">Hotel</span>
-                  <select value={hotel?.id || ""} onChange={(e) => setHotelId(e.target.value)} className={selectClass}>
-                    {bookable.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="block">
+                  <SelectField
+                    showSearch
+                    ariaLabel="Hotel"
+                    value={hotel?.id}
+                    onChange={setHotelId}
+                    options={bookable.map((h) => ({ value: h.id, label: h.name, hint: h.fromPrice ? `from ${formatTaka(h.fromPrice)}` : "" }))}
+                  />
+                </div>
+                <div>
                   <span className="mb-1.5 block text-[13px] font-semibold text-ink-700">Room type</span>
-                  <select value={room?.id || ""} onChange={(e) => setRoomId(e.target.value)} className={selectClass}>
-                    {hotel?.rooms.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.type} · {formatTaka(r.price)}/night
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                  <SelectField
+                    ariaLabel="Room type"
+                    value={room?.id}
+                    onChange={setRoomId}
+                    options={(hotel?.rooms || []).map((r) => ({ value: r.id, label: r.type, hint: `${formatTaka(r.price)}/night` }))}
+                  />
+                </div>
               </div>
               <div className="grid gap-4 rounded-3xl bg-ink-50 p-5 sm:grid-cols-2">
                 <Stepper label="Nights" value={nights} onDecrement={() => setNights((n) => n - 1)} onIncrement={() => setNights((n) => n + 1)} decDisabled={nights <= 1} incDisabled={nights >= 30} />

@@ -3,6 +3,7 @@ import { LuCircleCheck, LuLoaderCircle, LuMail, LuMessageCircle, LuSend } from "
 import { toast } from "sonner";
 import { useAddContactMutation } from "../../redux/Feature/Admin/contact/contactApi";
 import Faq from "../../components/ui/Faq";
+import SelectField from "../../components/ui/SelectField";
 
 const TOPICS = ["Booking help", "Change or cancel a booking", "Payment issue", "List my hotel", "Something else"];
 const EMPTY = { name: "", email: "", phone: "", subject: TOPICS[0], description: "" };
@@ -75,13 +76,15 @@ const Contact = () => {
                 <Field label="Phone" optional>
                   <input value={form.phone} onChange={set("phone")} className={inputClass} placeholder="01XXXXXXXXX" autoComplete="tel" />
                 </Field>
-                <Field label="Topic">
-                  <select value={form.subject} onChange={set("subject")} className={inputClass}>
-                    {TOPICS.map((t) => (
-                      <option key={t}>{t}</option>
-                    ))}
-                  </select>
-                </Field>
+                <div>
+                  <span className="mb-1.5 block text-[13px] font-semibold text-ink-700">Topic</span>
+                  <SelectField
+                    ariaLabel="Topic"
+                    value={form.subject}
+                    onChange={(v) => setForm((f) => ({ ...f, subject: v }))}
+                    options={TOPICS.map((t) => ({ value: t, label: t }))}
+                  />
+                </div>
               </div>
               <Field label="Message">
                 <textarea
@@ -103,7 +106,7 @@ const Contact = () => {
           )}
         </div>
 
-        <div className="space-y-4 pt-8 lg:pt-0">
+        <div className="space-y-4 lg:pt-16">
           {[
             { icon: LuMail, title: "By email", text: "Messages from this form go straight to the BEHB team, and we reply to the email you give us." },
             { icon: LuMessageCircle, title: "About a booking?", text: "Add your booking or transaction ID. You'll find it under My bookings and on your PDF receipt." },

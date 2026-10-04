@@ -5,6 +5,7 @@ import { useAllHotels } from "../../utils/useAllHotels";
 import { useGetDivisionsQuery } from "../../redux/Feature/User/place/placeApi";
 import HotelCard, { HotelCardSkeleton } from "../../components/ui/HotelCard";
 import Modal from "../../components/ui/Modal";
+import SelectField from "../../components/ui/SelectField";
 import { getAmenityIcon } from "../../components/ui/amenities";
 import { formatTaka, pluralize } from "../../utils/format";
 
@@ -52,18 +53,15 @@ const FilterPanel = ({ filters, update, divisions, amenityOptions, priceBounds }
     <div className="space-y-8">
       <div>
         <h3 className="text-sm font-bold text-ink-950">Division</h3>
-        <select
-          value={filters.division}
-          onChange={(e) => update({ division: e.target.value })}
-          className="mt-3 w-full rounded-2xl border border-ink-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
-        >
-          <option value="">All divisions</option>
-          {divisions.map((d) => (
-            <option key={d.id} value={String(d.serialId)}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+        <div className="mt-3">
+          <SelectField
+            showSearch
+            ariaLabel="Division"
+            value={filters.division}
+            onChange={(v) => update({ division: v })}
+            options={[{ value: "", label: "All divisions" }, ...divisions.map((d) => ({ value: String(d.serialId), label: d.name, hint: d.bn_name }))]}
+          />
+        </div>
       </div>
 
       {hi > lo && (
@@ -173,18 +171,14 @@ const Hotels = () => {
                 className="w-full rounded-full border border-ink-200 bg-white py-3.5 pl-11 pr-4 text-sm font-medium outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
               />
             </label>
-            <select
-              value={filters.sort}
-              onChange={(e) => update({ sort: e.target.value === "recommended" ? "" : e.target.value })}
-              aria-label="Sort hotels"
-              className="rounded-full border border-ink-200 bg-white px-5 py-3.5 text-sm font-semibold outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
-            >
-              {Object.entries(SORTS).map(([k, { label }]) => (
-                <option key={k} value={k}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <div className="sm:w-56">
+              <SelectField
+                ariaLabel="Sort hotels"
+                value={filters.sort}
+                onChange={(v) => update({ sort: v === "recommended" ? "" : v })}
+                options={Object.entries(SORTS).map(([k, { label }]) => ({ value: k, label }))}
+              />
+            </div>
             <button onClick={() => setSheetOpen(true)} className="btn-ghost justify-center py-3.5 lg:hidden">
               <LuSlidersHorizontal className="h-4 w-4" /> Filters {activeCount > 0 && `(${activeCount})`}
             </button>

@@ -1,36 +1,18 @@
-import React, { useContext } from "react";
+import { LuLoaderCircle } from "react-icons/lu";
 
-
-const SaveAndCloseButton = ({ title, isLoading, closeModal }) => {
-
-
-  return (
-    <div className="flex items-center gap-x-3 justify-end">
-      {closeModal && (
-        <button
-          disabled={isLoading}
-          onClick={() => closeModal()}
-          type="button"
-          className="bg-gray-200 disabled:cursor-not-allowed text-center text-gray-600 w-full lg:w-[200px] h-[45px] rounded-md"
-        >
+// Submit (and optional Close) buttons rendered by ZFormTwo in dashboard forms and modals.
+const SaveAndCloseButton = ({ title, isLoading, closeModal }) => (
+  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+    {closeModal && (
+      <button disabled={isLoading} onClick={() => closeModal()} type="button" className="btn-ghost sm:min-w-[140px]">
         Close
-        </button>
-      )}
-      <button
-        disabled={isLoading}
-        type="submit"
-        className={`${
-          title === "Login"
-            ? "lg:w-[88px] h-[35px]"
-            : "w-full lg:w-[200px] h-[45px]"
-        } bg-[#24354C] disabled:bg-[#4f5a67] disabled:cursor-not-allowed text-center text-white rounded-md`}
-      >
-        {isLoading
-         ? "Processing..."
-          : title}
       </button>
-    </div>
-  );
-};
+    )}
+    <button disabled={isLoading} type="submit" className="btn-brand sm:min-w-[180px]">
+      {isLoading && <LuLoaderCircle className="h-4 w-4 animate-spin" />}
+      {isLoading ? "Saving…" : title}
+    </button>
+  </div>
+);
 
 export default SaveAndCloseButton;

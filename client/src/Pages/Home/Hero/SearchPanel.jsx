@@ -2,19 +2,17 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { LuMap, LuMapPin, LuSearch } from "react-icons/lu";
 import { useGetDistrictsByDivisionQuery, useGetDivisionsQuery } from "../../../redux/Feature/User/place/placeApi";
+import SelectField from "../../../components/ui/SelectField";
 
 const Field = ({ icon: Icon, label, children }) => (
-  <label className="group flex flex-1 items-center gap-3 rounded-2xl px-4 py-3 transition hover:bg-ink-50 focus-within:bg-ink-50">
+  <div className="group flex flex-1 items-center gap-3 rounded-2xl px-4 py-3 transition hover:bg-ink-50 focus-within:bg-ink-50">
     <Icon className="h-5 w-5 shrink-0 text-brand-600" />
     <span className="flex min-w-0 flex-1 flex-col">
       <span className="text-[11px] font-bold uppercase tracking-wider text-ink-400">{label}</span>
       {children}
     </span>
-  </label>
+  </div>
 );
-
-const selectClass =
-  "w-full cursor-pointer appearance-none truncate bg-transparent text-sm font-semibold text-ink-900 outline-none disabled:cursor-not-allowed disabled:text-ink-300";
 
 // Hero search: hotel name (debounced) plus division and district filters.
 // Writes into the layout's outlet context, which the hotel list reads.
@@ -58,38 +56,31 @@ const SearchPanel = () => {
       <div className="mx-2 hidden h-10 w-px bg-ink-100 md:block" />
 
       <Field icon={LuMap} label="Division">
-        <select
+        <SelectField
+          bare
+          showSearch
+          ariaLabel="Division"
           value={divisionId}
-          onChange={(e) => setFilters(e.target.value, "")}
-          aria-label="Division"
-          className={selectClass}
-        >
-          <option value="">All divisions</option>
-          {divisions?.data?.map((d) => (
-            <option key={d.id} value={String(d.serialId)}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => setFilters(v, "")}
+          options={[{ value: "", label: "All divisions" }, ...(divisions?.data || []).map((d) => ({ value: String(d.serialId), label: d.name, hint: d.bn_name }))]}
+        />
       </Field>
 
       <div className="mx-2 hidden h-10 w-px bg-ink-100 md:block" />
 
       <Field icon={LuMapPin} label="District">
-        <select
+        <SelectField
+          bare
+          showSearch
+          ariaLabel="District"
           value={cityId}
-          onChange={(e) => setFilters(divisionId, e.target.value)}
+          onChange={(v) => setFilters(divisionId, v)}
           disabled={!divisionId || districtsLoading}
-          aria-label="District"
-          className={selectClass}
-        >
-          <option value="">{divisionId ? "All districts" : "Pick a division first"}</option>
-          {districts?.data?.map((d) => (
-            <option key={d.id} value={String(d.serialId)}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: "", label: divisionId ? "All districts" : "Pick a division first" },
+            ...(districts?.data || []).map((d) => ({ value: String(d.serialId), label: d.name, hint: d.bn_name })),
+          ]}
+        />
       </Field>
 
       <button type="submit" className="btn-brand m-1 h-14 rounded-[22px] px-8 text-base md:h-[60px]">
