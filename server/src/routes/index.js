@@ -25,6 +25,8 @@ const AreaService = require('../services/Area/AreaService');
 const AreaController = require('../controllers/areaController');
 const PaymentService = require('../services/Payment/PaymentService');
 const PaymentController = require('../controllers/paymentController');
+const InboxService = require('../services/Inbox/InboxService');
+const InboxController = require('../controllers/inboxController');
 
 const router = express.Router();
 
@@ -50,6 +52,7 @@ const areaService = new AreaService();
 const areaController = new AreaController(areaService)
 const paymentService = new PaymentService(prisma);
 const paymentController = new PaymentController(paymentService);
+const inboxController = new InboxController(new InboxService(prisma));
 //-------------------User Routes-----------------------
 router.post("/user/register",async(req,res,next)=>{
     userController.createUser(req,res,next)
@@ -244,5 +247,13 @@ router.post("/payment/success", (req, res) => paymentController.success(req, res
 router.post("/payment/fail", (req, res) => paymentController.fail(req, res));
 router.post("/payment/cancel", (req, res) => paymentController.fail(req, res));
 router.post("/payment/ipn", (req, res) => paymentController.ipn(req, res));
+
+//-------------------Contact & Newsletter Routes-----------------------
+router.post("/contact/create", (req, res, next) => inboxController.createContact(req, res, next));
+router.get("/contact", (req, res, next) => inboxController.getContacts(req, res, next));
+router.delete("/contact/:id", (req, res, next) => inboxController.deleteContact(req, res, next));
+router.post("/subscribe/create", (req, res, next) => inboxController.subscribe(req, res, next));
+router.get("/subscriptions", (req, res, next) => inboxController.getSubscribers(req, res, next));
+router.delete("/subscribe/:id", (req, res, next) => inboxController.deleteSubscriber(req, res, next));
 
 module.exports = router;

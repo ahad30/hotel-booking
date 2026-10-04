@@ -6,8 +6,10 @@ const columns = [
   {
     title: "Explore",
     links: [
-      { to: "/", label: "Home" },
+      { to: "/hotels", label: "All hotels" },
       { to: "/division", label: "Destinations" },
+      { to: "/compare", label: "Compare hotels" },
+      { to: "/saved", label: "Saved hotels" },
     ],
   },
   {
@@ -20,7 +22,10 @@ const columns = [
   },
   {
     title: "Company",
-    links: [{ to: "/privacy-policy", label: "Privacy policy" }],
+    links: [
+      { to: "/contact", label: "Contact & FAQ" },
+      { to: "/privacy-policy", label: "Privacy policy" },
+    ],
   },
 ];
 

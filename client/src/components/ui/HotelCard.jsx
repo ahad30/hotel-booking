@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { LuArrowUpRight, LuBedDouble, LuMapPin } from "react-icons/lu";
 import SmartImage from "./SmartImage";
+import HotelActions from "./HotelActions";
 import { AmenityChip } from "./amenities";
 import { formatTaka, lowestRoomPrice, pluralize } from "../../utils/format";
 
@@ -21,11 +22,13 @@ const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
   const amenities = hotel?.amenities || [];
   const to = `/hotel-details/${hotel?.id}`;
 
+  // Save/compare buttons sit beside the link (not inside it) so the markup stays valid.
   if (layout === "list") {
     return (
+      <div className="group relative">
       <Link
         to={to}
-        className="group flex flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft transition duration-300 hover:-translate-y-0.5 hover:shadow-lift sm:flex-row"
+        className="flex flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft transition duration-300 hover:-translate-y-0.5 hover:shadow-lift sm:flex-row"
       >
         <SmartImage
           src={hotel?.image}
@@ -56,14 +59,18 @@ const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
           </div>
         </div>
       </Link>
+      <div className="absolute left-3 top-3">
+        <HotelActions hotel={hotel} />
+      </div>
+      </div>
     );
   }
 
   return (
+    <div className="group relative flex animate-fade-up flex-col" style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}>
     <Link
       to={to}
-      style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
-      className="group flex animate-fade-up flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-lift"
+      className="flex flex-1 flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lift"
     >
       <div className="relative">
         <SmartImage
@@ -79,9 +86,6 @@ const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
             {pluralize(roomCount, "room type")}
           </span>
         )}
-        <span className="absolute right-3 top-3 grid h-9 w-9 translate-y-1 place-items-center rounded-full bg-white text-ink-900 opacity-0 shadow-soft transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <LuArrowUpRight className="h-4 w-4" />
-        </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
@@ -105,6 +109,10 @@ const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
         </div>
       </div>
     </Link>
+    <div className="absolute right-3 top-3 transition duration-300 group-hover:-translate-y-1">
+      <HotelActions hotel={hotel} />
+    </div>
+    </div>
   );
 };
 

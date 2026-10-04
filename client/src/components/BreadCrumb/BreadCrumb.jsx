@@ -1,51 +1,49 @@
-import React from 'react';
-import { Card } from '@material-tailwind/react';
-import { IoIosArrowForward } from "react-icons/io";
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from "react-router-dom";
+import { LuChevronRight } from "react-icons/lu";
 
+// "add-hotel" -> "Add hotel"; ids and other long tokens are shortened.
+const prettify = (segment) => {
+  if (/^[a-f0-9]{24}$/i.test(segment)) return `#${segment.slice(-6)}`;
+  const text = segment.replace(/[-_]/g, " ");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};
+
+// Page heading for dashboard screens: breadcrumb trail plus the current page title.
 const BreadCrumb = () => {
-  const location = useLocation();
-  const pathName = location.pathname;
-  let currentLinks = "";
-  const crumb = pathName
-    .split("/")
-    .filter((c) => c !== "")
-    .map((item, index) => {
-      currentLinks += `/${item}`;
-      const linkPath = 
-      item === "admin" 
-        ? "/admin/home" 
-        // : item === "UserDashboard" 
-        // ? "/UserDashboard/UserHome" 
-        : currentLinks;
-    
+  const { pathname } = useLocation();
+  const parts = pathname.split("/").filter(Boolean);
+  let href = "";
 
-      const displayName = item === "Dashboard" ? "Dashboard" : item;
-      const isLast = index === pathName.split("/").filter(c => c !== "").length - 1;
-
-      return (
-        <div key={linkPath}>
-          <Link to={linkPath}>
-            <a
-              className={`text-base flex items-center gap-x-2 ${
-                isLast ? "text-cyan-700 font-semibold" : ""
-              }`}
-            >
-              <span>{displayName}</span>
-              {!isLast && <IoIosArrowForward />}
-            </a>
-          </Link>
-        </div>
-      );
-    });
+  const crumbs = parts.map((part, i) => {
+    href += `/${part}`;
+    return { label: part === "admin" ? "Dashboard" : part === "user" ? "Account" : prettify(part), to: part === "admin" ? "/admin/home" : href, last: i === parts.length - 1 };
+  });
 
   return (
-    <Card className='p-2 hidden lg:block mb-5'>
-      <div className="flex w-fit my-3 rounded-full flex-wrap gap-x-2">
-        {crumb}
-      </div>
-    </Card>
+    <div className="mb-6">
+      <nav aria-label="Breadcrumb">
+        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-ink-500">
+          {crumbs.map((c) => (
+            <li key={c.to} className="flex items-center gap-1.5">
+              {c.last ? (
+                <span className="font-medium text-ink-900" aria-current="page">
+                  {c.label}
+                </span>
+              ) : (
+                <>
+                  <Link to={c.to} className="hover:text-ink-900">
+                    {c.label}
+                  </Link>
+                  <LuChevronRight className="h-3.5 w-3.5" />
+                </>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+      <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-ink-950">{crumbs[crumbs.length - 1]?.label}</h1>
+    </div>
   );
-}
+};
 
 export default BreadCrumb;

@@ -25,6 +25,8 @@ import { useAppDispatch } from "../../../redux/Hook/Hook";
 import { setBookingDetails } from "../../../redux/Booking/bookingSlice";
 import RoomGallery from "./RoomGallery";
 import RoomCard from "./RoomCard";
+import HotelActions from "../../../components/ui/HotelActions";
+import { trackRecentlyViewed } from "../../../utils/localCollections";
 import Modal from "../../../components/ui/Modal";
 import { AmenityChip, getAmenityIcon } from "../../../components/ui/amenities";
 import { formatTaka, lowestRoomPrice, pluralize } from "../../../utils/format";
@@ -146,6 +148,10 @@ const HotelDetails = () => {
     ];
     return all.filter((img, i) => img.src && all.findIndex((o) => o.src === img.src) === i);
   }, [hotel, rooms]);
+
+  useEffect(() => {
+    if (hotel?.id) trackRecentlyViewed(hotel.id);
+  }, [hotel?.id]);
 
   const isSelected = useCallback((roomId) => selectedRooms.some((room) => room.id === roomId), [selectedRooms]);
 
@@ -390,9 +396,12 @@ const HotelDetails = () => {
               <LuMapPin className="h-4 w-4 text-brand-500" /> {hotel.location}
             </p>
           </div>
-          <button onClick={handleShare} className="btn-ghost w-fit">
-            <LuShare2 className="h-4 w-4" /> Share
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <HotelActions hotel={hotel} variant="inline" />
+            <button onClick={handleShare} className="btn-ghost w-fit">
+              <LuShare2 className="h-4 w-4" /> Share
+            </button>
+          </div>
         </div>
 
         <div className="mt-6">

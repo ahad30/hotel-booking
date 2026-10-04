@@ -1,49 +1,50 @@
-import { Suspense } from "react";
-import PageLoader from "../../components/ui/PageLoader";
-import { Outlet } from "react-router-dom";
-import DashboardSidebarTwo from "./DashboardSidebarTwo";
-import { useState } from "react";
-import Navbar from "./Navbar";
+import {
+  LuBedDouble,
+  LuBell,
+  LuBuilding2,
+  LuCalendarCheck,
+  LuImages,
+  LuInbox,
+  LuLayoutDashboard,
+  LuMail,
+  LuMapPinned,
+  LuUser,
+  LuUsers,
+} from "react-icons/lu";
+import DashShell from "./DashShell";
 
-const DashboardLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  return (
-    <div className="flex">
-      <div className="hidden  lg:block">
-        <DashboardSidebarTwo></DashboardSidebarTwo>
-      </div>
+const groups = [
+  { title: "Overview", items: [{ to: "/admin/home", label: "Dashboard", icon: LuLayoutDashboard }] },
+  {
+    title: "Manage",
+    items: [
+      { to: "/admin/hotels", label: "Hotels", icon: LuBuilding2 },
+      { to: "/admin/areas", label: "Areas", icon: LuMapPinned },
+      { to: "/admin/bookings", label: "Bookings", icon: LuCalendarCheck },
+      { to: "/admin/users", label: "Users", icon: LuUsers },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      { to: "/admin/sliders", label: "Offer sliders", icon: LuImages },
+      { to: "/admin/notification", label: "Notifications", icon: LuBell },
+    ],
+  },
+  {
+    title: "Inbox",
+    items: [
+      { to: "/admin/messages", label: "Messages", icon: LuInbox },
+      { to: "/admin/subscribers", label: "Subscribers", icon: LuMail },
+    ],
+  },
+];
 
-      {/* for mobile */}
-      <div className="lg:hidden">
-        <DashboardSidebarTwo
-          className={`absolute duration-700 ${
-            isSidebarOpen ? "" : "-ml-[500px]"
-          }`}
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-        ></DashboardSidebarTwo>
-      </div>
+const accountLinks = [
+  { to: "/admin/profile", label: "Profile", icon: LuUser },
+  { to: "/hotels", label: "Browse hotels", icon: LuBedDouble },
+];
 
-      <div className="relative scrollbar-0 h-screen overflow-y-scroll w-full">
-        <div className="w-full text-gray-900">
-          <Navbar
-            isSidebarOpen={isSidebarOpen}
-            setIsSidebarOpen={setIsSidebarOpen}
-          ></Navbar>
-        </div>
-        <div
-          onClick={() => {
-            if (isSidebarOpen) {
-              setIsSidebarOpen(false);
-            }
-          }}
-          className=" py-12 bg-[#F3F5F7] px-5 w-full"
-        >
-          <Suspense fallback={<PageLoader />}><Outlet /></Suspense>
-        </div>
-      </div>
-    </div>
-  );
-};
+const DashboardLayout = () => <DashShell groups={groups} subtitle="Admin" accountLinks={accountLinks} />;
 
 export default DashboardLayout;

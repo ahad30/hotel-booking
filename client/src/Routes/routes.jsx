@@ -27,6 +27,10 @@ const District = lazy(() => import("../Pages/District/District"));
 const Area = lazy(() => import("../Pages/Area/Area"));
 const AreaByHotel = lazy(() => import("../Pages/Home/AllHotel/AreaByHotel"));
 const PrivacyPolicy = lazy(() => import("../Pages/PrivacyPolicy/PrivacyPolicy"));
+const Hotels = lazy(() => import("../Pages/Hotels/Hotels"));
+const Compare = lazy(() => import("../Pages/Compare/Compare"));
+const Saved = lazy(() => import("../Pages/Saved/Saved"));
+const Contact = lazy(() => import("../Pages/Contact/Contact"));
 const DashboardLayout = lazy(() => import("../Layouts/Dashboard/DashboardLayout"));
 const CustomerDashboardLayout = lazy(() => import("../Layouts/Dashboard/CustomerDashboardLayout"));
 const ErrorPageDashboard = lazy(() => import("../Pages/Error/ErrorPageDashboard"));
@@ -42,6 +46,10 @@ export const routes = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/home-division", element: <HomeDivision /> },
       { path: "/home-division/:divisionId", element: <HomeDivisionDetails /> },
+      { path: "/hotels", element: <Hotels /> },
+      { path: "/compare", element: <Compare /> },
+      { path: "/saved", element: <Saved /> },
+      { path: "/contact", element: <Contact /> },
       { path: "/division", element: <Division /> },
       { path: "/district/:divisionId", element: <District /> },
       { path: "/area/:districtId", element: <Area /> },

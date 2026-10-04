@@ -1,114 +1,177 @@
-import React  from "react";
-import { useGetUserByIdQuery, useUpdateUserMutation } from "../../../../redux/Feature/Admin/usersmanagement/userApi";
-import { useCurrentUser } from "../../../../redux/Feature/auth/authSlice";
-import { useAppSelector } from "../../../../redux/Hook/Hook";
-import ZInputTwo from "../../../../components/Form/ZInputTwo";
-import ZEmail from "../../../../components/Form/ZEmail";
-import { Skeleton } from "antd";
-import ZPhone from "../../../../components/Form/ZPhone";
-import ZFormTwo from "../../../../components/Form/ZFormTwo";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import { toast } from "sonner";
-import ChangePassword from "../Password/ChangePassword";
+import { LuBadgeCheck, LuEye, LuEyeOff, LuKeyRound, LuLoaderCircle, LuMail, LuPhone, LuUser } from "react-icons/lu";
+import { useGetUserByIdQuery, useUpdateUserMutation } from "../../../../redux/Feature/Admin/usersmanagement/userApi";
+import { useCurrentUser, setUser, useCurrentToken } from "../../../../redux/Feature/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "../../../../redux/Hook/Hook";
+
+const inputClass =
+  "w-full rounded-2xl border border-ink-200 bg-white px-4 py-3 text-[15px] outline-none transition placeholder:text-ink-400 hover:border-brand-300 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 disabled:bg-ink-50 disabled:text-ink-500";
+
+const Field = ({ label, hint, children }) => (
+  <label className="block">
+    <span className="mb-1.5 block text-[13px] font-semibold text-ink-700">{label}</span>
+    {children}
+    {hint && <span className="mt-1 block text-xs text-ink-400">{hint}</span>}
+  </label>
+);
+
+const PasswordInput = ({ value, onChange, placeholder, autoComplete }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input type={show ? "text" : "password"} value={value} onChange={onChange} placeholder={placeholder} autoComplete={autoComplete} className={`${inputClass} pr-12`} />
+      <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-700">
+        {show ? <LuEyeOff className="h-4 w-4" /> : <LuEye className="h-4 w-4" />}
+      </button>
+    </div>
+  );
+};
+
+const strength = (pw) => {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  return score;
+};
+const STRENGTH = ["Too short", "Weak", "Fair", "Good", "Strong"];
 
 const EditProfile = () => {
+  const dispatch = useAppDispatch();
   const user = useAppSelector(useCurrentUser);
+  const token = useAppSelector(useCurrentToken);
+  const { data, isLoading, isError } = useGetUserByIdQuery(user?.id, { skip: !user?.id });
+  const [updateUser, { isLoading: saving }] = useUpdateUserMutation();
+  const [updatePassword, { isLoading: changing }] = useUpdateUserMutation();
 
-  const {
-    data: userData,
-    isLoading: profileLoading,
-    isError: profileError,
-  } = useGetUserByIdQuery(user?.id);
+  const profile = data?.data;
+  const [form, setForm] = useState({ name: "", phone: "" });
+  const [pw, setPw] = useState({ next: "", confirm: "" });
 
-  const [updateUser, { isLoading: updateLoading, isSuccess: updateSuccess }] =
-    useUpdateUserMutation();
+  useEffect(() => {
+    if (profile) setForm({ name: profile.name || "", phone: profile.phone || "" });
+  }, [profile]);
 
-  const handleSubmit = async (data) => {
-    const profileUpdateData = {
-      ...data,
-    };
+  const dirty = profile && (form.name !== profile.name || form.phone !== profile.phone);
 
+  const saveProfile = async (e) => {
+    e.preventDefault();
     try {
-      // Use unwrap() to handle the mutation result
-      await updateUser({ id: user?.id, data: profileUpdateData }).unwrap();
-      toast.success("Profile Updated Successfully");
-    } catch (error) {
-      // Handle error if the mutation fails
-      toast.error("Failed to update profile. Please try again.");
-      console.error("Update error:", error);
+      // Only the editable fields are sent.
+      const res = await updateUser({ id: user.id, data: { name: form.name.trim(), phone: form.phone.trim() } }).unwrap();
+      dispatch(setUser({ token, user: { ...user, name: res?.data?.name ?? form.name, phone: res?.data?.phone ?? form.phone } }));
+      toast.success("Profile updated.");
+    } catch (err) {
+      toast.error(err?.data?.message || "Couldn't update your profile.");
     }
   };
 
-  if (profileLoading) {
-    return <Skeleton />;
-  }
+  const changePassword = async (e) => {
+    e.preventDefault();
+    if (pw.next.length < 6) return toast.error("Use at least 6 characters.");
+    if (pw.next !== pw.confirm) return toast.error("The two passwords don't match.");
+    try {
+      await updatePassword({ id: user.id, data: { password: pw.next } }).unwrap();
+      setPw({ next: "", confirm: "" });
+      toast.success("Password changed.");
+    } catch (err) {
+      toast.error(err?.data?.message || "Couldn't change your password.");
+    }
+  };
 
-  if (profileError) {
-    return <div>Profile error occurred</div>;
-  }
+  if (isLoading) return <div className="skeleton h-96 rounded-3xl" />;
+  if (isError || !profile) return <div className="card p-10 text-center font-semibold text-ink-700">Couldn&apos;t load your profile.</div>;
+
+  const score = strength(pw.next);
 
   return (
-    <>
-      <div className="bg-white  p-6 md:p-10 grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-10">
-        <div className="flex flex-col justify-center items-center">
-          <div className="relative w-56 h-[150px] left-5 lg:mt-[-70px]">
-            <img
-              className="h-[180px] w-[180px] rounded-full absolute object-cover"
-              src={`https://ui-avatars.com/api/?name=${userData?.data?.name?.charAt(0) || "A"}`}
-              alt={"admin_avatar"}
-            />
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-extrabold tracking-tight text-ink-950">Profile & security</h1>
+        <p className="mt-1 text-ink-500">Keep your details up to date and your account secure.</p>
+      </div>
 
-          <div className="flex flex-col justify-center items-center bg-[#bdcef4] px-6 rounded-t-[30px] w-[300px] h-[190px] gap-y-2">
-            <h1 className="text-[#042656] mt-3 text-[16px] font-sans font-semibold">
-              {userData?.data?.name || "Admin"}
-            </h1>
-            <span className="text-[#555555] mt-1 text-[13px] font-normal font-mono">
-              {userData?.data?.email || "superadmin@gmail.com"}
-            </span>
-          </div>
-        </div>
-
-        <div>
-          <ZFormTwo
-            isLoading={updateLoading}
-            isSuccess={updateSuccess}
-            submit={handleSubmit}
-            buttonName={"Save Changes"}
-            formType={"edit"}
-            data={userData?.data} // Pass the user data here
-          >
-            <div>
-              <h1 className="text-2xl mt-2 text-center">Profile Information</h1>
+      <div className="relative isolate overflow-hidden rounded-4xl bg-ink-950 p-6 text-white sm:p-8">
+        <div className="absolute -right-16 -top-16 -z-10 h-56 w-56 rounded-full bg-brand-600/40 blur-3xl" />
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <span className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl bg-brand-gradient text-3xl font-extrabold">
+            {(profile.name || "U").charAt(0).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <h2 className="flex items-center gap-2 text-2xl font-extrabold">
+              {profile.name}
+              {profile.isVerified && <LuBadgeCheck className="h-5 w-5 text-cyan-300" aria-label="Verified" />}
+            </h2>
+            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-300">
+              <span className="flex items-center gap-1.5">
+                <LuPhone className="h-4 w-4" /> {profile.phone}
+              </span>
+              {profile.email && (
+                <span className="flex items-center gap-1.5">
+                  <LuMail className="h-4 w-4" /> {profile.email}
+                </span>
+              )}
+              {profile.createdAt && <span>Member since {format(new Date(profile.createdAt), "MMMM yyyy")}</span>}
             </div>
-
-            <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-              <div className="relative">
-                <ZInputTwo
-                  required={1}
-                  name="name"
-                  type="text"
-                  label={"Name"}
-                  placeholder={"Enter your name"}
-                  value={userData?.data?.name}
-                />
-              </div>
-              <div className="relative">
-                <ZEmail readOnly={1} label={"Email"} name={"email"} value={userData?.data?.email} />
-              </div>
-              <div className="relative">
-                <ZPhone label={"Phone"} name={"phone"} value={userData?.data?.phone} />
-              </div>
-            </div>
-          </ZFormTwo>
-
+          </div>
         </div>
       </div>
-          <div className="lg:flex justify-end mb-10">
-           <div className="lg:w-[68%] px-4">
-           <ChangePassword/>
-           </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <form onSubmit={saveProfile} className="card space-y-5 p-6 sm:p-8">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-600">
+              <LuUser className="h-5 w-5" />
+            </span>
+            <h2 className="text-lg font-bold text-ink-950">Personal details</h2>
           </div>
-    </>
+          <Field label="Full name">
+            <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className={inputClass} autoComplete="name" />
+          </Field>
+          <Field label="Phone number" hint="You log in with this number.">
+            <input required value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} className={inputClass} autoComplete="tel" />
+          </Field>
+          <Field label="Email" hint="Contact support to change your email.">
+            <input value={profile.email || ""} disabled className={inputClass} />
+          </Field>
+          <button type="submit" disabled={!dirty || saving} className="btn-brand w-full py-3.5">
+            {saving && <LuLoaderCircle className="h-4 w-4 animate-spin" />} Save changes
+          </button>
+        </form>
+
+        <form onSubmit={changePassword} className="card space-y-5 p-6 sm:p-8">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-600">
+              <LuKeyRound className="h-5 w-5" />
+            </span>
+            <h2 className="text-lg font-bold text-ink-950">Change password</h2>
+          </div>
+          <Field label="New password">
+            <PasswordInput value={pw.next} onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))} placeholder="At least 6 characters" autoComplete="new-password" />
+          </Field>
+          {pw.next && (
+            <div aria-live="polite">
+              <div className="flex gap-1">
+                {[0, 1, 2, 3].map((i) => (
+                  <span key={i} className={`h-1.5 flex-1 rounded-full ${i < score ? (score <= 1 ? "bg-rose-500" : score === 2 ? "bg-amber-500" : "bg-emerald-500") : "bg-ink-100"}`} />
+                ))}
+              </div>
+              <p className="mt-1 text-xs font-semibold text-ink-500">{STRENGTH[score]}</p>
+            </div>
+          )}
+          <Field label="Confirm new password">
+            <PasswordInput value={pw.confirm} onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} placeholder="Type it again" autoComplete="new-password" />
+          </Field>
+          {pw.confirm && pw.next !== pw.confirm && <p className="text-xs font-semibold text-rose-600">Passwords don&apos;t match yet.</p>}
+          <button type="submit" disabled={!pw.next || !pw.confirm || changing} className="btn-primary w-full py-3.5">
+            {changing && <LuLoaderCircle className="h-4 w-4 animate-spin" />} Update password
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 

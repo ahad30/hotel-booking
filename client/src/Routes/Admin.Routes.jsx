@@ -9,7 +9,8 @@ import { CiShop } from "react-icons/ci";
 import { FaUsers } from "react-icons/fa";
 const Users = lazy(() => import("../Pages/Dashboard/Admin/Customers/Users"));
 const AddUser = lazy(() => import("../Pages/Dashboard/Admin/Customers/AddUser/AddUser"));
-const EditAdminProfile = lazy(() => import("../Pages/Dashboard/Admin/Profile/EditAdminProfile"));
+// Admins share the account profile page (personal details + password).
+const EditAdminProfile = lazy(() => import("../Pages/Dashboard/User/EditProfile/EditProfile"));
 const Hotel = lazy(() => import("../Pages/Dashboard/Admin/Hotel/Hotel"));
 const AddHotel = lazy(() => import("../Pages/Dashboard/Admin/Hotel/AddHotel"));
 const EditHotel = lazy(() => import("../Pages/Dashboard/Admin/Hotel/EditHotel"));
@@ -19,6 +20,8 @@ const Bookings = lazy(() => import("../Pages/Dashboard/Admin/Bookings/Bookings")
 const AddNotification = lazy(() => import("../Pages/Dashboard/Admin/AddNotification/AddNotification"));
 const Area = lazy(() => import("../Pages/Dashboard/Admin/Area/Area"));
 const EditSlider = lazy(() => import("../Pages/Dashboard/Admin/Slider/EditSlider"));
+const Contact = lazy(() => import("../Pages/Dashboard/Admin/Contact/Contact"));
+const Subscription = lazy(() => import("../Pages/Dashboard/Admin/Subscription/Subscription"));
 
 
 export const adminRoutes = [
@@ -93,6 +96,14 @@ export const adminRoutes = [
     element: <AddNotification/>,
     icon: <MdNotificationImportant  size={20}/>,
     permissionName: "view notification",
+  },
+  {
+    path: "messages",
+    element: <Contact />,
+  },
+  {
+    path: "subscribers",
+    element: <Subscription />,
   },
   {
     path: "users/add-user",
