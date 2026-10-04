@@ -317,13 +317,15 @@ The server's CORS settings allow `http://localhost:5173` and `http://localhost:5
 
 ## Deployment
 
-Both apps are set up for **Vercel**:
+Both apps deploy automatically on **Vercel** from this GitHub repo, as two projects with their Root Directory set to `client` and `server`:
 
-- **Client**: `client/vercel.json` sends every path to the SPA so React Router can handle it. `client/public/_redirects` does the same for Netlify. To deploy from the CLI:
-  ```bash
-  cd client
-  npx vercel@latest deploy --prod
-  ```
+- A push to **`main`** deploys both apps to production.
+- A push to any other branch (such as `dev`) creates **preview** deployments with their own URLs.
+- An app is skipped when its folder didn't change in the push (Ignored Build Step: `git diff HEAD^ HEAD --quiet -- .`).
+
+Per app:
+
+- **Client**: `client/vercel.json` sends every path to the SPA so React Router can handle it. `client/public/_redirects` does the same for Netlify.
 - **Server**: `server/vercel.json` runs `index.js` through `@vercel/node` and generates the Prisma client during the build.
 
 Set the environment variables above in each Vercel project. Add the deployed client URL to the CORS `origin` list in `server/index.js`.
