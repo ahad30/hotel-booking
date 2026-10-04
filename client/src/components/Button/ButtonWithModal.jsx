@@ -1,41 +1,25 @@
-
 import { Link } from "react-router-dom";
+import { LuArrowLeft, LuPlus } from "react-icons/lu";
 import { useAppDispatch } from "../../redux/Hook/Hook";
 import { setIsAddModalOpen } from "../../redux/Modal/ModalSlice";
-import { AiFillFastBackward, AiFillPlusSquare } from "react-icons/ai";
-const ButtonWithModal = ({
-  title,
-  path,
-  back
-}) => {
- 
 
-
+// Primary action on dashboard list pages: links to a page, or opens the Add modal.
+const ButtonWithModal = ({ title, path, back }) => {
   const dispatch = useAppDispatch();
-  return path ? (
-    <Link to={`${path}`}>
-      <button className="bg-[#24354C] flex justify-center items-center gap-2  text-center text-white w-full px-2 lg:px-0 py-2 lg:py-0 lg:w-[200px] lg:h-[45px] rounded-md">
-        
-      {
-     back ? (
+  const content = (
     <>
-      <AiFillFastBackward /> {title}
+      {back ? <LuArrowLeft className="h-4 w-4" /> : <LuPlus className="h-4 w-4" />} {title}
     </>
-  ) : (
-    <>
-      <AiFillPlusSquare /> {title}
-    </>
-  )
-}
+  );
+  const className = back ? "btn-ghost w-full lg:w-auto" : "btn-brand w-full lg:w-auto";
 
-      </button>
+  return path ? (
+    <Link to={path} className={className}>
+      {content}
     </Link>
   ) : (
-    <button
-      onClick={() => dispatch(setIsAddModalOpen())}
-      className="bg-[#24354C] flex justify-center  items-center gap-2  text-center text-white w-full px-2 lg:px-0 py-2 lg:py-0 lg:w-[200px] lg:h-[45px] rounded-md"
-    >
-      < AiFillPlusSquare/> {title}
+    <button onClick={() => dispatch(setIsAddModalOpen())} className={className}>
+      {content}
     </button>
   );
 };

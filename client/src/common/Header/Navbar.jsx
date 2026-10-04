@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { LuBell, LuChevronDown, LuHistory, LuLayoutDashboard, LuLogOut, LuUser } from "react-icons/lu";
+import { LuBell, LuChevronDown, LuHeart, LuHistory, LuLayoutDashboard, LuLogOut, LuUser } from "react-icons/lu";
+import { useSaved } from "../../utils/localCollections";
 import Logo from "../../components/ui/Logo";
 import { useAppDispatch, useAppSelector } from "../../redux/Hook/Hook";
 import { logout, useCurrentToken, useCurrentUser } from "../../redux/Feature/auth/authSlice";
@@ -15,8 +16,30 @@ export const useUnreadCount = () => {
 
 const navLinks = [
   { to: "/", label: "Home", end: true },
+  { to: "/hotels", label: "Hotels" },
   { to: "/division", label: "Destinations" },
+  { to: "/contact", label: "Contact" },
 ];
+
+const SavedLink = ({ transparent }) => {
+  const { ids } = useSaved();
+  return (
+    <Link
+      to="/saved"
+      aria-label={`Saved hotels${ids.length ? `, ${ids.length}` : ""}`}
+      className={`relative hidden h-10 w-10 place-items-center rounded-full transition sm:grid ${
+        transparent ? "bg-white/15 text-white hover:bg-white/25" : "bg-ink-100 text-ink-700 hover:bg-ink-200"
+      }`}
+    >
+      <LuHeart className="h-[18px] w-[18px]" />
+      {ids.length > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-[20px] place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+          {ids.length}
+        </span>
+      )}
+    </Link>
+  );
+};
 
 const UserMenu = ({ user, onLogout, transparent }) => {
   const [open, setOpen] = useState(false);
@@ -35,6 +58,7 @@ const UserMenu = ({ user, onLogout, transparent }) => {
     user?.role === "admin"
       ? [{ to: "/admin/home", label: "Admin dashboard", icon: LuLayoutDashboard }]
       : [
+          { to: "/user/overview", label: "My dashboard", icon: LuLayoutDashboard },
           { to: "/user/user-booking", label: "My bookings", icon: LuHistory },
           { to: "/user/user-profile", label: "Profile", icon: LuUser },
           { to: "/notification", label: "Notifications", icon: LuBell },
@@ -169,6 +193,8 @@ const Navbar = () => {
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <SavedLink transparent={transparent} />
+
           {isLoggedIn && user?.role === "admin" && (
             <Link
               to="/admin/home"

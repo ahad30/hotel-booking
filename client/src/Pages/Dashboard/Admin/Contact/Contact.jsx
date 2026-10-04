@@ -58,9 +58,16 @@ const Contacts = () => {
       key: "phone",
     },
     {
+      title: "Topic",
+      dataIndex: "subject",
+      key: "subject",
+      render: (subject) => (subject ? <span className="chip whitespace-nowrap">{subject}</span> : "—"),
+    },
+    {
       title: "Message",
       dataIndex: "description",
       key: "description",
+      render: (text) => <p className="max-w-xs whitespace-pre-line text-ink-700">{text}</p>,
     },
     {
       title: "Date",

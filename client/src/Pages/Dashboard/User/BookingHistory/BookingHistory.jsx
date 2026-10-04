@@ -1,343 +1,239 @@
-import React, { useState, useRef } from "react";
-import { Table, Tag, Space, Tooltip, Button } from "antd";
-import { AiFillEye, AiOutlineFilePdf } from "react-icons/ai";
-import moment from "moment";
-import { FaGreaterThan, FaHome } from "react-icons/fa";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../../../redux/Hook/Hook";
-import { setIsViewModalOpen } from "../../../../redux/Modal/ModalSlice";
+import { differenceInCalendarDays, format, isBefore, startOfDay } from "date-fns";
+import { toast } from "sonner";
+import { LuArrowRight, LuCalendarX, LuDownload, LuEye, LuLoaderCircle, LuReceipt } from "react-icons/lu";
+import { useAppSelector } from "../../../../redux/Hook/Hook";
 import { useCurrentUser } from "../../../../redux/Feature/auth/authSlice";
-import DashboardTable from "../../../../components/Table/DashboardTable";
-import ViewModal from "../../../../components/Modal/ViewModal";
-import ViewBooking from "./ViewBooking";
 import { useGetUserBookingsQuery } from "../../../../redux/Feature/Admin/booking/bookingApi";
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import image from "../../../../assets/icon.png"; // Adjust the path to your logo image
+import { useAllHotels } from "../../../../utils/useAllHotels";
+import SmartImage from "../../../../components/ui/SmartImage";
+import StatusPill from "../../../../components/ui/StatusPill";
+import Modal from "../../../../components/ui/Modal";
+import { formatTaka, pluralize } from "../../../../utils/format";
 
+const TABS = [
+  { id: "upcoming", label: "Upcoming" },
+  { id: "past", label: "Past" },
+  { id: "cancelled", label: "Cancelled" },
+  { id: "all", label: "All" },
+];
 
-// Create styles for PDF document
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontFamily: 'Helvetica'
-  },
-  header: {
-    marginBottom: 20,
-    textAlign: 'center'
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 5
-  },
-  section: {
-    marginBottom: 15
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    borderBottom: '1 solid #000',
-    paddingBottom: 5
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5
-  },
-  label: {
-    fontWeight: 'bold',
-    width: '40%'
-  },
-  value: {
-    width: '60%'
-  },
-  roomRow: {
-    marginBottom: 15,
-    paddingBottom: 10,
-    borderBottom: '1 solid #eee'
-  },
-  footer: {
-    marginTop: 30,
-    textAlign: 'center',
-    fontSize: 12,
-    color: '#666'
-  },
- logoContainer: {
-    display: 'flex',
-  
-    justifyContent: 'center',
-    alignItems: 'center'},
-  logo: {
-    width: 150,
-    marginBottom: 10
-  }
+const PAYMENT = {
+  paid: "bg-emerald-50 text-emerald-700",
+  pending: "bg-amber-50 text-amber-700",
+  failed: "bg-rose-50 text-rose-700",
+};
 
-
-});
-
-// Create PDF document component for each booking
-const BookingReceipt = ({ booking }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-        <Image src={image} style={styles.logo} />
-        </View>
-        <Text style={styles.title}>BOOKING RECEIPT</Text>
-        <Text style={styles.subtitle}>Thank you for your reservation</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Booking Information</Text>
-        {/* <View style={styles.row}>
-          <Text style={styles.label}>Booking ID:</Text>
-          <Text style={styles.value}>{booking.id}</Text>
-        </View> */}
-        <View style={styles.row}>
-          <Text style={styles.label}>Transaction ID:</Text>
-          <Text style={styles.value}>{booking.transactionId}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Booking Date:</Text>
-          <Text style={styles.value}>{booking.createdAt}</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Guest Information</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>Name:</Text>
-          <Text style={styles.value}>{booking.name}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{booking.email}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Phone:</Text>
-          <Text style={styles.value}>{booking.phone}</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Stay Details</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>Check-In:</Text>
-          <Text style={styles.value}>{booking.checkIn}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Check-Out:</Text>
-          <Text style={styles.value}>{booking.checkOut}</Text>
-        </View>
-        {/* <View style={styles.row}>
-          <Text style={styles.label}>Nights:</Text>
-          <Text style={styles.value}>
-            {moment(booking.checkOut).diff(moment(booking.checkIn), 'days')} nights
-          </Text>
-        </View> */}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Room Details</Text>
-        {booking?.bookingItem?.map((room, index) => (
-          <View key={index} style={styles.roomRow}>
-            <View style={styles.row}>
-              <Text style={styles.label}>Room {index + 1}:</Text>
-              <Text style={styles.value}>{room.type} (Room #{room.roomNumber})</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Capacity:</Text>
-              <Text style={styles.value}>{room.capacity} person(s)</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Price:</Text>
-              <Text style={styles.value}>${room.price}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Amenities:</Text>
-              <Text style={styles.value}>{room.amenities.join(', ')}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Payment Summary</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>Subtotal:</Text>
-          <Text style={styles.value}>${booking.totalPrice}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Payment Status:</Text>
-          <Text style={styles.value}>
-            {booking.paymentStatus === "paid" ? "Paid" : "Pending"}
-          </Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Booking Status:</Text>
-          <Text style={styles.value}>
-            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-          </Text>
-        </View>
-        <View style={[styles.row, { marginTop: 10 }]}>
-          <Text style={[styles.label, { fontWeight: 'bold', fontSize: 16 }]}>Total:</Text>
-          <Text style={[styles.value, { fontWeight: 'bold', fontSize: 16 }]}>
-            ${booking.totalPrice}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.footer}>
-        <Text>Thank you for choosing our service!</Text>
-        <Text>For any inquiries, please contact support@example.com</Text>
-      </View>
-    </Page>
-  </Document>
-);
+// The PDF library is large, so it's only loaded when a receipt is requested.
+const useReceipt = () => {
+  const [busy, setBusy] = useState(null);
+  const download = async (booking) => {
+    setBusy(booking.id);
+    try {
+      const { downloadReceipt } = await import("./receipt");
+      await downloadReceipt(booking, booking.hotel?.name);
+    } catch {
+      toast.error("Couldn't create the receipt. Please try again.");
+    } finally {
+      setBusy(null);
+    }
+  };
+  return { busy, download };
+};
 
 const BookingHistory = () => {
-  const dispatch = useAppDispatch();
   const user = useAppSelector(useCurrentUser);
-  const { data, error, isLoading } = useGetUserBookingsQuery(user?.id);
-  const { isViewModalOpen } = useAppSelector((state) => state.modal);
-  const [selectedBooking, setSelectedBooking] = useState(null);
+  const { data, isLoading, isError, refetch } = useGetUserBookingsQuery(user?.id, { skip: !user?.id });
+  const { byId } = useAllHotels();
+  const [tab, setTab] = useState("upcoming");
+  const [selected, setSelected] = useState(null);
+  const receipt = useReceipt();
 
-  const bookingsData = data?.data?.map((booking, index) => ({
-    key: index + 1,
-    id: booking?.id,
-    name: booking?.name,
-    email: booking?.email,
-    phone: booking?.phone,
-    checkIn: moment(booking?.checkIn).format("Do MMM YYYY ,  h:mm a"),
-    checkOut: moment(booking?.checkOut).format("Do MMM YYYY ,  h:mm a"),
-    totalPrice: booking?.totalPrice,
-    paymentStatus: booking?.paymentStatus,
-    status: booking?.status,
-    transactionId: booking?.transactionId,
-    bookingItem: booking?.bookingItem,
-    createdAt: moment(booking?.createdAt).format('Do MMMM YYYY, h:mm:ss a')
-  }));
+  const bookings = useMemo(() => {
+    const today = startOfDay(new Date());
+    return (data?.data || [])
+      .map((b) => {
+        const hotel = byId.get(b.rooms?.[0]?.hotelId);
+        return {
+          ...b,
+          hotel,
+          image: hotel?.image || b.rooms?.[0]?.images?.[0],
+          nights: Math.max(1, differenceInCalendarDays(new Date(b.checkOut), new Date(b.checkIn))),
+          isPast: isBefore(new Date(b.checkOut), today),
+        };
+      })
+      .sort((a, b) => new Date(b.checkIn) - new Date(a.checkIn));
+  }, [data, byId]);
 
-  const handleViewBooking = (bookingData) => {
-    setSelectedBooking(bookingData);
-    dispatch(setIsViewModalOpen());
+  const groups = {
+    upcoming: bookings.filter((b) => b.status !== "cancelled" && !b.isPast).reverse(),
+    past: bookings.filter((b) => b.status !== "cancelled" && b.isPast),
+    cancelled: bookings.filter((b) => b.status === "cancelled"),
+    all: bookings,
   };
-
-  const columns = [
-    {
-      title: "Booking Id",
-      dataIndex: "id",
-      key: "id",
-    },
-    // {
-    //   title: "Name",
-    //   dataIndex: "name",
-    //   key: "name",
-    // },
-    // {
-    //   title: "Email",
-    //   dataIndex: "email",
-    //   key: "email",
-    // },
-    // {
-    //   title: "Phone",
-    //   dataIndex: "phone",
-    //   key: "phone",
-    // },
-    // {
-    //   title: "Price",
-    //   dataIndex: "totalPrice",
-    //   key: "totalPrice",
-    //   render: (totalPrice) => <Tag color="cyan">{totalPrice} Tk</Tag>,
-    // },
-    // {
-    //   title: "Payment",
-    //   dataIndex: "paymentStatus",
-    //   key: "paymentStatus",
-    //   render: (status) => (
-    //     <Tag color={status === "paid" ? "green" : "red"}>{status}</Tag>
-    //   ),
-    // },
-    // {
-    //   title: "Booking Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (status) => (
-    //     <Tag
-    //       color={
-    //         status === "pending"
-    //           ? "blue"
-    //           : status === "confirmed"
-    //           ? "green"
-    //           : status === "cancelled"
-    //           ? "red"
-    //           : "default"
-    //       }
-    //     >
-    //       {status}
-    //     </Tag>
-    //   ),
-    // },
-    {
-      title: "Actions",
-      key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <Tooltip title="View Booking Details">
-            <Button 
-              type="text" 
-              icon={<AiFillEye className="text-blue-500" size={20} />} 
-              onClick={() => handleViewBooking(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Download PDF">
-            <PDFDownloadLink 
-              document={<BookingReceipt booking={record} />} 
-              fileName={`Booking_${record.id}.pdf`}
-            >
-              {({ loading }) => (
-                loading ? 'Loading...' :  
-                <Button type="text" icon={<AiOutlineFilePdf className="text-red-500" size={20} />} />
-              )}
-            </PDFDownloadLink>
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ];
+  const shown = groups[tab];
 
   return (
-    <>
-      <div className="py-5">
-        <DashboardTable columns={columns} data={bookingsData} loading={isLoading} />
-
-        <ViewModal width={800} isViewModalOpen={isViewModalOpen}>
-          {selectedBooking && (
-            <>
-              <ViewBooking selectedBooking={selectedBooking} />
-              <div className="text-center mt-4">
-                <PDFDownloadLink 
-                  document={<BookingReceipt booking={selectedBooking} />} 
-                  fileName={`Booking_${selectedBooking.id}.pdf`}
-                >
-                  {({ loading }) => (
-                    loading ? 'Preparing document...' : 
-                    <Button type="primary" icon={<AiOutlineFilePdf />} className="bg-red-500 hover:bg-red-600">
-                      Download Receipt
-                    </Button>
-                  )}
-                </PDFDownloadLink>
-              </div>
-            </>
-          )}
-        </ViewModal>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-extrabold tracking-tight text-ink-950">My bookings</h1>
+        <p className="mt-1 text-ink-500">Your stays, payment status and receipts in one place.</p>
       </div>
-    </>
+
+      <div className="grid grid-cols-4 gap-1 rounded-full bg-white p-1 shadow-soft ring-1 ring-ink-100 sm:flex sm:w-fit" role="tablist">
+        {TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={`flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-xs font-semibold transition sm:gap-2 sm:px-4 sm:text-sm ${
+              tab === id ? "bg-ink-950 text-white" : "text-ink-600 hover:bg-ink-50"
+            }`}
+          >
+            {label}
+            <span className={`hidden rounded-full px-1.5 text-[11px] sm:inline ${tab === id ? "bg-white/20" : "bg-ink-100"}`}>{groups[id].length}</span>
+          </button>
+        ))}
+      </div>
+
+      {isError ? (
+        <div className="card p-10 text-center">
+          <p className="font-bold text-ink-950">Couldn&apos;t load your bookings.</p>
+          <button onClick={refetch} className="btn-primary mt-4">
+            Try again
+          </button>
+        </div>
+      ) : isLoading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="skeleton h-36 rounded-3xl" />
+          ))}
+        </div>
+      ) : shown.length === 0 ? (
+        <div className="card flex flex-col items-center gap-3 px-6 py-14 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+            <LuCalendarX className="h-7 w-7" />
+          </span>
+          <p className="text-lg font-bold text-ink-900">No {tab === "all" ? "" : `${TABS.find((t) => t.id === tab).label.toLowerCase()} `}bookings</p>
+          <Link to="/hotels" className="btn-primary mt-2">
+            Find a hotel <LuArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      ) : (
+        <ul className="space-y-4">
+          {shown.map((b) => (
+            <li key={b.id} className="card overflow-hidden transition hover:shadow-lift">
+              <div className="flex flex-col sm:flex-row">
+                <SmartImage src={b.image} alt={b.hotel?.name || "Hotel"} className="aspect-[16/9] sm:aspect-auto sm:w-56 sm:shrink-0" />
+                <div className="flex flex-1 flex-col gap-4 p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-bold text-ink-950">{b.hotel?.name || "Hotel booking"}</h2>
+                      <p className="mt-0.5 text-sm text-ink-500">
+                        {format(new Date(b.checkIn), "EEE, d MMM")} → {format(new Date(b.checkOut), "EEE, d MMM yyyy")} · {pluralize(b.nights, "night")}
+                      </p>
+                    </div>
+                    <StatusPill status={b.status} />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(b.bookingItem || []).map((item, i) => (
+                      <span key={i} className="chip">
+                        {item.roomType} × {item.quantity || 1}
+                      </span>
+                    ))}
+                    <span className={`chip ${PAYMENT[b.paymentStatus] || ""}`}>Payment: {b.paymentStatus || "pending"}</span>
+                  </div>
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-4">
+                    <p className="text-lg font-extrabold tabular-nums text-ink-950">{formatTaka(b.totalPrice)}</p>
+                    <div className="flex gap-2">
+                      <button onClick={() => setSelected(b)} className="btn-ghost py-2">
+                        <LuEye className="h-4 w-4" /> Details
+                      </button>
+                      <button onClick={() => receipt.download(b)} disabled={receipt.busy === b.id} className="btn-primary py-2">
+                        {receipt.busy === b.id ? <LuLoaderCircle className="h-4 w-4 animate-spin" /> : <LuDownload className="h-4 w-4" />} Receipt
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Modal
+        open={Boolean(selected)}
+        onClose={() => setSelected(null)}
+        title="Booking details"
+        size="lg"
+        footer={
+          selected && (
+            <div className="flex flex-wrap justify-end gap-2">
+              {selected.hotel && (
+                <Link to={`/hotel-details/${selected.hotel.id}`} className="btn-ghost">
+                  View hotel
+                </Link>
+              )}
+              <button onClick={() => receipt.download(selected)} disabled={receipt.busy === selected.id} className="btn-brand">
+                <LuReceipt className="h-4 w-4" /> Download receipt
+              </button>
+            </div>
+          )
+        }
+      >
+        {selected && (
+          <div className="space-y-6 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-lg font-bold text-ink-950">{selected.hotel?.name || "Hotel booking"}</p>
+                <p className="text-ink-500">{selected.hotel?.location}</p>
+              </div>
+              <StatusPill status={selected.status} />
+            </div>
+            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {[
+                ["Check-in", format(new Date(selected.checkIn), "EEE, d MMM yyyy")],
+                ["Check-out", format(new Date(selected.checkOut), "EEE, d MMM yyyy")],
+                ["Nights", selected.nights],
+                ["Guest", selected.name],
+                ["Phone", selected.phone],
+                ["Payment", selected.paymentStatus || "pending"],
+              ].map(([k, v]) => (
+                <div key={k} className="rounded-2xl bg-ink-50 p-3">
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-ink-400">{k}</dt>
+                  <dd className="mt-0.5 truncate font-semibold capitalize text-ink-900">{v || "—"}</dd>
+                </div>
+              ))}
+            </dl>
+            <div>
+              <h3 className="mb-2 font-bold text-ink-950">Rooms</h3>
+              <ul className="divide-y divide-ink-100 rounded-2xl border border-ink-100">
+                {(selected.bookingItem || []).map((item, i) => (
+                  <li key={i} className="flex items-center justify-between gap-3 p-3">
+                    <div>
+                      <p className="font-semibold text-ink-900">
+                        {item.roomType} × {item.quantity || 1}
+                      </p>
+                      <p className="text-xs text-ink-500">
+                        {pluralize(item.adults || 0, "adult")}, {pluralize(item.children || 0, "child", "children")} · {formatTaka(item.price)}/night
+                      </p>
+                    </div>
+                    <p className="font-semibold tabular-nums text-ink-900">{formatTaka((item.price || 0) * (item.quantity || 1) * selected.nights)}</p>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 flex items-center justify-between px-1">
+                <p className="font-bold text-ink-950">Total</p>
+                <p className="text-xl font-extrabold tabular-nums text-ink-950">{formatTaka(selected.totalPrice)}</p>
+              </div>
+            </div>
+            {selected.transactionId && <p className="text-xs text-ink-400">Transaction ID: {selected.transactionId}</p>}
+          </div>
+        )}
+      </Modal>
+    </div>
   );
 };
 

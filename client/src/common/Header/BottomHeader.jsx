@@ -1,20 +1,22 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LuBell, LuCompass, LuHouse, LuLayoutDashboard, LuUser } from "react-icons/lu";
+import { LuBell, LuCompass, LuHeart, LuHouse, LuLayoutDashboard, LuUser } from "react-icons/lu";
 import { useAppSelector } from "../../redux/Hook/Hook";
 import { useCurrentUser } from "../../redux/Feature/auth/authSlice";
 import { useUnreadCount } from "./Navbar";
 
 const customerTabs = [
   { to: "/", label: "Home", icon: LuHouse, end: true },
-  { to: "/division", label: "Explore", icon: LuCompass },
+  { to: "/hotels", label: "Explore", icon: LuCompass },
+  { to: "/saved", label: "Saved", icon: LuHeart },
   { to: "/notification", label: "Alerts", icon: LuBell, badge: true },
-  { to: "/user/user-profile", label: "Profile", icon: LuUser },
+  { to: "/user/overview", label: "Account", icon: LuUser },
 ];
 
 // Customer pages are off-limits to admins, so they get the dashboard instead.
 const adminTabs = [
   { to: "/", label: "Home", icon: LuHouse, end: true },
-  { to: "/division", label: "Explore", icon: LuCompass },
+  { to: "/hotels", label: "Explore", icon: LuCompass },
+  { to: "/saved", label: "Saved", icon: LuHeart },
   { to: "/admin/home", label: "Dashboard", icon: LuLayoutDashboard },
 ];
 
@@ -36,7 +38,7 @@ const BottomHeader = () => {
       className="fixed inset-x-3 bottom-3 z-50 rounded-3xl border border-ink-100 bg-white/90 shadow-lift backdrop-blur-xl lg:hidden"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className={`grid ${tabs.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
+      <ul className={`grid ${tabs.length === 4 ? "grid-cols-4" : "grid-cols-5"}`}>
         {tabs.map(({ to, label, icon: Icon, end, badge }) => (
           <li key={to}>
             <NavLink
@@ -50,7 +52,7 @@ const BottomHeader = () => {
             >
               {({ isActive }) => (
                 <>
-                  <span className={`relative grid h-8 w-12 place-items-center rounded-full transition ${isActive ? "bg-brand-100" : ""}`}>
+                  <span className={`relative grid h-8 w-11 place-items-center rounded-full transition ${isActive ? "bg-brand-100" : ""}`}>
                     <Icon className="h-5 w-5" />
                     {badge && unread > 0 && (
                       <span className="absolute right-1.5 top-0 grid h-4 min-w-[16px] place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">

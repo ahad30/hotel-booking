@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LuMailCheck } from "react-icons/lu";
+// import { LuMailCheck } from "react-icons/lu";
 import ZInputTwo from "../../../components/Form/ZInputTwo";
 import ZFormTwo from "../../../components/Form/ZFormTwo";
 import ZEmail from "../../../components/Form/ZEmail";
@@ -8,14 +8,14 @@ import ZPhone from "../../../components/Form/ZPhone";
 import { useAppSelector } from "../../../redux/Hook/Hook";
 import { useCurrentToken, useCurrentUser } from "../../../redux/Feature/auth/authSlice";
 import { useRegisterMutation } from "../../../redux/Feature/auth/authApi";
-import Modal from "../../../components/ui/Modal";
+// import Modal from "../../../components/ui/Modal";
 import AuthShell from "../AuthShell";
 
 const Register = () => {
   const navigate = useNavigate();
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
-  const [showModal, setShowModal] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
 
   const [register, { isLoading, error, isError, isSuccess, data: rData }] = useRegisterMutation();
 
@@ -27,9 +27,14 @@ const Register = () => {
     }
   }, [token, user, navigate]);
 
+  // Verification emails aren't sent yet, so the "check your inbox" popup is
+  // disabled and new users go straight to login. Restore it once email works.
+  // useEffect(() => {
+  //   if (isSuccess) setShowModal(true);
+  // }, [isSuccess]);
   useEffect(() => {
-    if (isSuccess) setShowModal(true);
-  }, [isSuccess]);
+    if (isSuccess) navigate("/login", { replace: true });
+  }, [isSuccess, navigate]);
 
   const handleSubmit = (data) => {
     register({ ...data, role: "user" });
@@ -66,6 +71,7 @@ const Register = () => {
         </ZFormTwo>
       </AuthShell>
 
+      {/*
       <Modal open={showModal} onClose={() => setShowModal(false)} title="Registration successful" size="md">
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <span className="grid h-16 w-16 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
@@ -80,6 +86,7 @@ const Register = () => {
           </Link>
         </div>
       </Modal>
+      */}
     </>
   );
 };

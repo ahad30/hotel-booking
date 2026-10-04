@@ -4,6 +4,7 @@ import Navbar from "../../common/Header/Navbar";
 import BottomHeader from "../../common/Header/BottomHeader";
 import Footer from "../../common/Footer/Footer";
 import PageLoader from "../../components/ui/PageLoader";
+import CompareTray from "../../components/ui/CompareTray";
 
 // Pages that were not redesigned as full-width layouts get a padded container.
 const contained = ["/notification", "/privacy-policy", "/verify", "/home-division"];
@@ -33,6 +34,7 @@ const MainLayout = () => {
         </Suspense>
       </main>
       {!noFooter.includes(pathname) && <Footer />}
+      <CompareTray />
       <BottomHeader />
       <ScrollRestoration />
     </div>
