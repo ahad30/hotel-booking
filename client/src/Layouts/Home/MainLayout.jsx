@@ -7,7 +7,7 @@ import PageLoader from "../../components/ui/PageLoader";
 
 // Pages that were not redesigned as full-width layouts get a padded container.
 const contained = ["/notification", "/privacy-policy", "/verify", "/home-division"];
-const noFooter = ["/login", "/register", "/admin-login", "/checkout"];
+const noFooter = ["/login", "/register", "/checkout"];
 
 const MainLayout = () => {
   const { pathname } = useLocation();

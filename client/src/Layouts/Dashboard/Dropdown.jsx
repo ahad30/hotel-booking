@@ -18,7 +18,7 @@ const Dropdown = () => {
   const handleLogout = () => {
     dispatch(logout());
     toast.success("You are successfully logged out.")
-    navigate("/admin-login")
+    navigate("/login")
   };
   return (
     <Menu as="div" className="relative inline-block text-left">

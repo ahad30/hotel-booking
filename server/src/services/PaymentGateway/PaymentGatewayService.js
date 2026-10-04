@@ -1,12 +1,22 @@
 const SSLCommerzPayment = require('sslcommerz-lts');// import dotenvHelper from './dotenvHelper';  // Ensure this is correctly imported
 const dotenvHelper = require('../../config/dotenv');
 
+// Store credentials shared by payment creation and validation. Environment
+// variables take precedence over the sandbox store that was hard-coded here.
+const store_id = process.env.SSLCOMMERZ_STORE_ID || 'bijon66efc7e8a6d5e';
+const store_password = process.env.SSLCOMMERZ_STORE_PASSWORD || 'bijon66efc7e8a6d5e@ssl';
+const is_live = String(process.env.SSLCOMMERZ_IS_LIVE) === 'true';
+
 class PaymentGatewayService {
 
+    // Confirms a payment with SSLCommerz's validation API. The success
+    // callback alone can be forged, so this is what proves the payment.
+    async validate(val_id) {
+        const sslcz = new SSLCommerzPayment(store_id, store_password, is_live);
+        return sslcz.validate({ val_id });
+    }
+
     async createPayment({ name, email, phone, address, productName, price }) {
-        const store_id = 'bijon66efc7e8a6d5e';
-        const store_password = 'bijon66efc7e8a6d5e@ssl';
-        const is_live = false;
         const tranId = Date.now().toString();  // Generating unique transaction ID
 
         const data = {

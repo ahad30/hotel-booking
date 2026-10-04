@@ -23,6 +23,8 @@ const divisionService = new DivisionService();
 const divisionController = new DivisionController(divisionService);
 const AreaService = require('../services/Area/AreaService');
 const AreaController = require('../controllers/areaController');
+const PaymentService = require('../services/Payment/PaymentService');
+const PaymentController = require('../controllers/paymentController');
 
 const router = express.Router();
 
@@ -46,6 +48,8 @@ const districtService = new DistrictService();
 const districtController = new DistrictController(districtService); 
 const areaService = new AreaService();
 const areaController = new AreaController(areaService)
+const paymentService = new PaymentService(prisma);
+const paymentController = new PaymentController(paymentService);
 //-------------------User Routes-----------------------
 router.post("/user/register",async(req,res,next)=>{
     userController.createUser(req,res,next)
@@ -234,5 +238,11 @@ router.get("/area/:id", areaController.getAreaById.bind(areaController));
 router.put("/area/:id", areaController.updateArea.bind(areaController));
 router.delete("/area/:id", areaController.deleteArea.bind(areaController));
 router.get("/area/by-district/:id",areaController.areaByDistrict.bind(areaController));
+
+//-------------------Payment Routes (SSLCommerz callbacks)-----------------------
+router.post("/payment/success", (req, res) => paymentController.success(req, res));
+router.post("/payment/fail", (req, res) => paymentController.fail(req, res));
+router.post("/payment/cancel", (req, res) => paymentController.fail(req, res));
+router.post("/payment/ipn", (req, res) => paymentController.ipn(req, res));
 
 module.exports = router;

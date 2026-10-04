@@ -2,6 +2,11 @@ const { PrismaClient } = require("@prisma/client");
 const PaymentGatewayService = require("../PaymentGateway/PaymentGatewayService");
 const catchAsync = require("../../shared/catchAsync");
 const { ObjectId } = require('mongodb');
+const ApiError = require("../../error/handleApiError");
+
+// Unpaid checkouts hold their rooms for this long while the customer pays.
+const HOLD_MINUTES = 30;
+
 class BookingService {
     constructor() {
         this.prisma = new PrismaClient();
@@ -9,9 +14,24 @@ class BookingService {
     }
 
     async createBooking(data) {
-        // Check room availability before booking
-        // const isAvailable = await this.checkRoomAvailability(data.roomId, data.checkIn, data.checkOut);
-        // if (!isAvailable) throw new Error("Room is not available for the selected dates");
+        // Re-check every room before sending the customer to payment: it may
+        // have sold out since they selected it, or the API was called directly.
+        for (const item of data.bookingItem || []) {
+            const { available, remaining } = await this.checkAvailability({
+                roomId: item.roomId,
+                checkIn: data.checkIn,
+                checkOut: data.checkOut,
+                quantity: item.quantity,
+            });
+            if (!available) {
+                throw new ApiError(
+                    409,
+                    remaining > 0
+                        ? `Only ${remaining} ${item.roomType || ""} room(s) left for these dates. Please update your selection.`
+                        : `${item.roomType || "This"} room is no longer available for these dates.`
+                );
+            }
+        }
 
         const { GatewayPageURL, tranId } = await this.paymentService.createPayment({
             name: data.name,
@@ -122,32 +142,68 @@ class BookingService {
         return bookingsWithRooms;
       }
       
-    async checkAvailability({ roomId, checkIn, checkOut }) {
-        const start = new Date(checkIn);
-        const end = new Date(checkOut);
-
-        const overlappingBookings = await this.prisma.booking.findMany({
+    // Bookings that still hold rooms on these dates: paid or admin-confirmed,
+    // or unpaid but younger than the hold window. Failed/cancelled never count.
+    activeOverlapping(roomId, start, end) {
+        const holdCutoff = new Date(Date.now() - HOLD_MINUTES * 60 * 1000);
+        return this.prisma.booking.findMany({
             where: {
-                roomIds: {
-                    has: roomId // Use has operator for array field
-                },
+                roomIds: { has: roomId },
                 AND: [
                     { checkIn: { lt: end } },
-                    { checkOut: { gt: start } }
-                ]
-            }
+                    { checkOut: { gt: start } },
+                    { status: { not: "cancelled" } },
+                    { paymentStatus: { not: "failed" } },
+                    {
+                        OR: [
+                            { paymentStatus: "paid" },
+                            { status: "confirmed" },
+                            { createdAt: { gte: holdCutoff } },
+                        ],
+                    },
+                ],
+            },
         });
+    }
 
-        if (overlappingBookings.length > 0) {
+    // Rooms of one type already taken on overlapping dates. A booking stores
+    // the quantity per room in bookingItem; older ones without it count as 1.
+    bookedQuantity(bookings, roomId) {
+        return bookings.reduce((sum, booking) => {
+            const items = (booking.bookingItem || []).filter((i) => i?.roomId === roomId);
+            const qty = items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
+            return sum + (items.length ? qty : 1);
+        }, 0);
+    }
+
+    // A room type is available while enough of its roomQty units are free.
+    async checkAvailability({ roomId, checkIn, checkOut, quantity = 1 }) {
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+        const requested = Math.max(1, Number(quantity) || 1);
+
+        const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+        if (!room || !room.isAvailable) {
+            return { available: false, remaining: 0, message: "This room isn't available for booking." };
+        }
+
+        const overlapping = await this.activeOverlapping(roomId, start, end);
+        const remaining = Math.max(0, (room.roomQty || 0) - this.bookedQuantity(overlapping, roomId));
+
+        if (remaining < requested) {
             return {
                 available: false,
-                message: "Room is already booked in this time slot.",
-                bookings: overlappingBookings
+                remaining,
+                message:
+                    remaining > 0
+                        ? `Only ${remaining} room(s) of this type left for these dates.`
+                        : "Room is already booked in this time slot.",
             };
         }
 
         return {
             available: true,
+            remaining,
             message: "Room is available for booking."
         };
     }
