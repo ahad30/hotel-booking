@@ -43,7 +43,7 @@ const Login = () => {
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Log in to book rooms and manage your stays. Admins sign in here too."
+      subtitle="Log in to book rooms and manage your stays."
       footer={
         <>
           New to BEHB?{" "}

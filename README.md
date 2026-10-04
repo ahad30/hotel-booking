@@ -19,6 +19,7 @@ A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **di
 - [Environment variables](#environment-variables)
 - [Scripts](#scripts)
 - [Deployment](#deployment)
+- [Demo admin login](#demo-admin-login)
 
 ---
 
@@ -329,3 +330,13 @@ Per app:
 - **Server**: `server/vercel.json` runs `index.js` through `@vercel/node` and generates the Prisma client during the build.
 
 Set the environment variables above in each Vercel project. Add the deployed client URL to the CORS `origin` list in `server/index.js`.
+
+---
+
+## Demo admin login
+
+Sign in at [behb-hotel-booking.vercel.app/login](https://behb-hotel-booking.vercel.app/login) to explore the admin dashboard:
+
+| Role | Phone | Password |
+|---|---|---|
+| Admin | `01883687463` | `123456` |

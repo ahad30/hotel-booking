@@ -78,11 +78,11 @@ class HotelService {
         return hotel;
     }
 
+    // Rooms are included so hotel cards can show the "from" price, matching the main hotel list.
     async getHotelByArea(areaId){
-
-       
         const hotel = await this.prisma.hotel.findMany({
             where: { areaId: areaId },
+            include: { rooms: { where: { isAvailable: true } } },
         });
         return hotel;
     }
