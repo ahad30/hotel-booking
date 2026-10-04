@@ -2,13 +2,13 @@
 
 A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **division → district → area**, check room availability, book rooms and pay online through **SSLCommerz**. Admins manage hotels, rooms, locations, bookings, users, homepage sliders and notifications from a dashboard.
 
-- **Live client:** https://behb-hotel-booking.netlify.app/
-- **API docs (Swagger UI):** `<backend-url>/api-docs`
+- **Live site:** https://behb-hotel-booking.vercel.app
 
 ---
 
 ## Table of contents
 
+- [Highlights](#highlights)
 - [Features](#features)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
@@ -22,12 +22,36 @@ A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **di
 
 ---
 
+## Highlights
+
+### Design
+- A custom Tailwind design system: the Plus Jakarta Sans font, a brand palette taken from the BEHB logo gradient, and shared buttons, cards, chips and skeleton loaders (`client/src/components/ui/`).
+- Fully responsive: a transparent navbar over the hero photo on desktop, and a floating tab bar plus bottom booking bar on phones.
+- Accessible details: keyboard-friendly modals and photo viewer (Escape and arrow keys), visible focus rings, ARIA labels, and support for reduced-motion settings.
+
+### Performance
+Measured on the production build of the home page:
+
+| Home page download | Before redesign | After |
+|---|---|---|
+| JavaScript | 4.4 MB (1.34 MB gzipped) | 438 KB (133 KB gzipped) |
+| CSS | 264 KB | 63 KB (11 KB gzipped) |
+
+How:
+- **Route-level code splitting** with `React.lazy`: the admin dashboard, PDF export, rich-text editor and date picker download only on the pages that use them.
+- **Vendor chunks** (`react-vendor`, `state-vendor`) that browsers can keep cached between deploys.
+- **Preloading** of the font and the hero image from `index.html`; every other image is lazy-loaded, decoded off the main thread and faded in once ready.
+- **Lightweight components:** CSS scroll-snap carousels and hand-built modals instead of carousel and UI-kit libraries on the public pages, and a debounced hotel search so the API isn't called on every keystroke.
+
+---
+
 ## Features
 
 ### Guests / customers
-- Browse hotels by location (division → district → area), or see all hotels at once
-- Hotel details page with a room gallery, amenities and pricing
-- Check room availability for chosen check-in and check-out dates
+- Search hotels by name, division and district from the home page, with grid or list view and live "from ৳X / night" prices
+- Browse hotels by location (division → district → area → hotels)
+- Hotel page with a photo gallery and full-screen viewer, amenities, map, and room cards with room, adult and child counts
+- Check room availability for chosen check-in and check-out dates (changing dates clears selected rooms so availability is re-checked)
 - Book multiple rooms in one checkout and pay through SSLCommerz (BDT)
 - Pages shown after a successful, failed or cancelled payment
 - Register and log in, with email verification through a token link (`/verify/:token`)
@@ -50,18 +74,18 @@ A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **di
 |---|---|
 | **Frontend** | React 18, Vite 4 (SWC), React Router 6 |
 | **State / data fetching** | Redux Toolkit, RTK Query, redux-persist |
-| **UI** | Tailwind CSS, Ant Design, Material Tailwind, PrimeReact, Headless UI, Heroicons, React Icons |
-| **Forms** | React Hook Form, CKEditor 5, react-datepicker |
-| **Media / sliders** | Swiper, Keen Slider, react-image-gallery, react-responsive-carousel |
-| **Docs / printing** | @react-pdf/renderer, react-to-pdf, react-to-print |
-| **Feedback** | Sonner, react-hot-toast, antd `message` |
+| **UI** | Tailwind CSS (custom design system), React Icons (Lucide set), Ant Design (form fields and admin tables), Material Tailwind and Headless UI (dashboard) |
+| **Forms** | React Hook Form, CKEditor 5 |
+| **Dates** | react-datepicker, date-fns, Moment |
+| **PDF** | @react-pdf/renderer (booking receipts) |
+| **Notifications** | Sonner toasts |
 | **Backend** | Node.js, Express 4 |
 | **Database / ORM** | MongoDB with Prisma 6 |
 | **Auth** | bcryptjs (password hashing), jsonwebtoken (JWT) |
 | **Payments** | SSLCommerz (`sslcommerz-lts`) |
 | **Email** | Nodemailer |
 | **API docs** | swagger-jsdoc, swagger-ui-express |
-| **Hosting** | Vercel (client and server) |
+| **Hosting** | Vercel (client and server), Netlify (client mirror) |
 
 ---
 
@@ -74,25 +98,33 @@ Hotel_Booking/
 ├── client/                         # React + Vite frontend
 │   ├── public/_redirects           # SPA fallback for Netlify
 │   ├── vercel.json                 # SPA rewrites for Vercel
-│   ├── vite.config.js
-│   ├── tailwind.config.js
+│   ├── index.html                  # SEO/Open Graph tags, font + hero image preloads
+│   ├── vite.config.js              # Vendor chunk splitting
+│   ├── tailwind.config.js          # Design tokens: brand/ink colours, shadows, animations
 │   └── src/
-│       ├── main.jsx                # App entry: Redux Provider, PersistGate, Router
-│       ├── App.jsx
+│       ├── main.jsx                # App entry: Redux Provider, PersistGate, Toaster
+│       ├── App.jsx                 # RouterProvider
+│       ├── index.css               # Base styles and shared classes (btn, card, chip, skeleton)
 │       ├── Routes/
-│       │   ├── routes.jsx                  # Top-level router (public, /admin, /user)
+│       │   ├── routes.jsx                  # Top-level router; every page except Home is lazy-loaded
 │       │   ├── Admin.Routes.jsx            # Admin dashboard routes + sidebar items
 │       │   ├── Customer.Routes.jsx         # Customer dashboard routes
 │       │   ├── AdminPanelProtectedRoutes/  # Allows only users with role === "admin"
 │       │   └── UserProtectedRoutes/        # Allows only logged-in users
 │       ├── Layouts/
-│       │   ├── Home/MainLayout.jsx         # Public site layout (header + footer)
+│       │   ├── Home/MainLayout.jsx         # Public layout: navbar, footer, mobile tab bar, search context
 │       │   └── Dashboard/                  # Admin & customer dashboard layouts, sidebars, navbars
 │       ├── Pages/
-│       │   ├── Home/                       # Banner slider, divisions, all hotels, hotel details
-│       │   ├── Division/ District/ Area/   # Browsing hotels by location
+│       │   ├── Home/
+│       │   │   ├── Hero/                   # Hero section and search panel (name, division, district)
+│       │   │   ├── AllHotel/               # Hotel grid/list with filters; hotels by area
+│       │   │   ├── BannerSlider/           # Offers carousel (CSS scroll-snap)
+│       │   │   ├── Destinations/           # Division photo grid
+│       │   │   ├── WhyUs/                  # Features and "how it works"
+│       │   │   └── HotelDetails/           # Gallery + lightbox, room cards, booking summary, date picker
+│       │   ├── Division/ District/ Area/   # Step-by-step browsing by location
 │       │   ├── Checkout/ Success/ Error/   # Booking and payment flow
-│       │   ├── Auth/                       # Login, Register, AdminLogin
+│       │   ├── Auth/                       # Shared AuthShell layout; Login, Register, AdminLogin
 │       │   ├── Verify/                     # Email verification
 │       │   ├── Notification/ PrivacyPolicy/
 │       │   └── Dashboard/
@@ -100,11 +132,13 @@ Hotel_Booking/
 │       │       │                           # AddNotification, Contact, Subscription, Statistics, Profile
 │       │       └── User/                   # BookingHistory, EditProfile, ChangePassword
 │       ├── components/
+│       │   ├── ui/                         # Design-system components: HotelCard, SmartImage, Modal,
+│       │   │                               # Stepper, PlaceList, Logo, PageLoader, amenity icons
 │       │   ├── Form/                       # Reusable "Z*" form inputs (ZFormTwo, ZInputTwo, ZSelect, ZImageInput, ...)
-│       │   ├── Modal/                      # Add / Edit / View / Delete modals
+│       │   ├── Modal/                      # Admin Add / Edit / View / Delete modals
 │       │   ├── Table/DashboardTable.jsx    # Shared antd table for admin lists
 │       │   └── Skeleton/ BreadCrumb/ Button/ ...
-│       ├── common/                         # Header, Footer, ErrorPage
+│       ├── common/                         # Navbar, mobile tab bar, Footer, 404 page
 │       ├── redux/
 │       │   ├── store/store.js              # Store config (persists auth and booking)
 │       │   ├── Api/baseApi.js              # RTK Query base (VITE_BACKEND_URL + Bearer token)
@@ -113,7 +147,7 @@ Hotel_Booking/
 │       │   ├── Feature/auth/               # Auth API and slice
 │       │   ├── Booking/ Modal/ loading/    # Local UI slices
 │       │   └── Hook/Hook.jsx               # Typed useAppDispatch / useAppSelector
-│       └── utils/                          # routesGenerator, sidebarGenerator, OptionsGenerator, error helpers
+│       └── utils/                          # Price formatting, routesGenerator, sidebarGenerator, error helpers
 │
 └── server/                         # Express + Prisma backend
     ├── index.js                    # App entry: CORS, JSON, Swagger, /api/v1 router, DB connect
@@ -186,7 +220,7 @@ Every endpoint starts with **`/api/v1`**. Interactive docs are served at **`/api
 
 | Path | Page |
 |---|---|
-| `/` | Home: banner slider, divisions, featured hotels |
+| `/` | Home: hero search, hotels, offers, destinations, features |
 | `/division` → `/district/:divisionId` → `/area/:districtId` → `/hotel/:areaId` | Browse hotels by location |
 | `/hotel-details/:id` | Hotel details, rooms and gallery |
 | `/checkout`, `/success`, `/cancel` | Booking and payment flow |
@@ -285,7 +319,11 @@ The server's CORS settings allow `http://localhost:5173` and `http://localhost:5
 
 Both apps are set up for **Vercel**:
 
-- **Client**: `client/vercel.json` sends every path to the SPA so React Router can handle it. `client/public/_redirects` does the same for Netlify.
+- **Client**: `client/vercel.json` sends every path to the SPA so React Router can handle it. `client/public/_redirects` does the same for Netlify. To deploy from the CLI:
+  ```bash
+  cd client
+  npx vercel@latest deploy --prod
+  ```
 - **Server**: `server/vercel.json` runs `index.js` through `@vercel/node` and generates the Prisma client during the build.
 
 Set the environment variables above in each Vercel project. Add the deployed client URL to the CORS `origin` list in `server/index.js`.
