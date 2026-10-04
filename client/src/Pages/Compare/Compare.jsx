@@ -61,22 +61,22 @@ const Compare = () => {
           </div>
         ) : (
           <div className="card overflow-x-auto">
-            <table className="w-full min-w-[640px] table-fixed border-collapse text-left text-sm">
+            <table className="w-full min-w-[480px] table-fixed border-collapse text-left text-sm sm:min-w-[640px]">
               <caption className="sr-only">Hotel comparison</caption>
               {/* Equal hotel columns regardless of image or text length. */}
               <colgroup>
-                <col className="w-48" />
+                <col className="w-28 sm:w-48" />
                 {hotels.map((h) => (
                   <col key={h.id} />
                 ))}
               </colgroup>
               <thead>
                 <tr>
-                  <th scope="col" className="w-48 p-5 align-bottom text-xs font-bold uppercase tracking-wider text-ink-400">
+                  <th scope="col" className="sticky left-0 z-10 bg-white p-3 align-bottom text-xs font-bold uppercase tracking-wider text-ink-400 sm:p-5">
                     {hotels.length < 2 && <span className="normal-case tracking-normal text-ink-500">Add one more hotel to compare.</span>}
                   </th>
                   {hotels.map((h) => (
-                    <th key={h.id} scope="col" className="p-5 align-top font-normal">
+                    <th key={h.id} scope="col" className="p-3 align-top font-normal sm:p-5">
                       <div className="relative">
                         <SmartImage src={h.image} alt={h.name} className="aspect-[4/3] rounded-2xl" />
                         <button
@@ -98,11 +98,11 @@ const Compare = () => {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.label} className="border-t border-ink-100">
-                    <th scope="row" className="p-5 text-xs font-bold uppercase tracking-wider text-ink-400">
+                    <th scope="row" className="sticky left-0 z-10 bg-white p-3 text-[10px] font-bold uppercase tracking-wider text-ink-400 sm:p-5 sm:text-xs">
                       {row.label}
                     </th>
                     {hotels.map((h) => (
-                      <td key={h.id} className="p-5 font-medium text-ink-800">
+                      <td key={h.id} className="p-3 font-medium text-ink-800 sm:p-5">
                         <span className={row.highlight && h.id === cheapestId ? "rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-emerald-700 ring-1 ring-emerald-100" : ""}>
                           {row.render(h)}
                         </span>
@@ -120,13 +120,13 @@ const Compare = () => {
                   const Icon = getAmenityIcon(a);
                   return (
                     <tr key={a} className="border-t border-ink-100">
-                      <th scope="row" className="p-4 pl-5 font-medium text-ink-700">
+                      <th scope="row" className="sticky left-0 z-10 bg-white p-3 font-medium text-ink-700 sm:p-4 sm:pl-5">
                         <span className="flex items-center gap-2">
                           <Icon className="h-4 w-4 text-brand-600" /> {a}
                         </span>
                       </th>
                       {hotels.map((h) => (
-                        <td key={h.id} className="p-4 pl-5">
+                        <td key={h.id} className="p-3 sm:p-4 sm:pl-5">
                           {h.amenities?.includes(a) ? (
                             <span className="inline-flex items-center gap-1.5 text-emerald-700">
                               <LuCheck className="h-4 w-4" /> <span className="text-xs font-semibold">Yes</span>

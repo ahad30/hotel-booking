@@ -6,6 +6,7 @@ import { useGetDivisionsQuery } from "../../redux/Feature/User/place/placeApi";
 import HotelCard, { HotelCardSkeleton } from "../../components/ui/HotelCard";
 import Modal from "../../components/ui/Modal";
 import SelectField from "../../components/ui/SelectField";
+import PriceRange from "./PriceRange";
 import { getAmenityIcon } from "../../components/ui/amenities";
 import { formatTaka, pluralize } from "../../utils/format";
 
@@ -36,15 +37,14 @@ const useFilters = () => {
       if (Array.isArray(v)) v.forEach((x) => next.append(k, x));
       else if (v !== null && v !== "" && v !== undefined) next.set(k, v);
     });
-    setParams(next, { replace: true });
+    // preventScrollReset: changing a filter must not jump the page back to the top.
+    setParams(next, { replace: true, preventScrollReset: true });
   };
-  return { filters, update, reset: () => setParams({}, { replace: true }) };
+  return { filters, update, reset: () => setParams({}, { replace: true, preventScrollReset: true }) };
 };
 
 const FilterPanel = ({ filters, update, divisions, amenityOptions, priceBounds }) => {
   const [lo, hi] = priceBounds;
-  const min = filters.min ?? lo;
-  const max = filters.max ?? hi;
 
   const toggleAmenity = (a) =>
     update({ amenity: filters.amenities.includes(a) ? filters.amenities.filter((x) => x !== a) : [...filters.amenities, a] });
@@ -66,32 +66,7 @@ const FilterPanel = ({ filters, update, divisions, amenityOptions, priceBounds }
 
       {hi > lo && (
         <div>
-          <div className="flex items-baseline justify-between">
-            <h3 className="text-sm font-bold text-ink-950">Price per night</h3>
-            <span className="text-xs font-semibold text-ink-500">
-              {formatTaka(min)} – {formatTaka(max)}
-            </span>
-          </div>
-          <div className="mt-4 space-y-3">
-            {[
-              { label: "Minimum price", value: min, key: "min", onChange: (v) => update({ min: Math.min(v, max) === lo ? null : Math.min(v, max) }) },
-              { label: "Maximum price", value: max, key: "max", onChange: (v) => update({ max: Math.max(v, min) === hi ? null : Math.max(v, min) }) },
-            ].map(({ label, value, key, onChange }) => (
-              <label key={key} className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-ink-400">{label}</span>
-                <input
-                  type="range"
-                  min={lo}
-                  max={hi}
-                  step={Math.max(100, Math.round((hi - lo) / 50 / 100) * 100)}
-                  value={value}
-                  onChange={(e) => onChange(Number(e.target.value))}
-                  className="mt-1 w-full accent-brand-600"
-                  aria-label={label}
-                />
-              </label>
-            ))}
-          </div>
+          <PriceRange bounds={priceBounds} value={[filters.min, filters.max]} onCommit={update} />
         </div>
       )}
 

@@ -81,19 +81,19 @@ const BookingHistory = () => {
         <p className="mt-1 text-ink-500">Your stays, payment status and receipts in one place.</p>
       </div>
 
-      <div className="flex gap-1 overflow-x-auto rounded-full bg-white p-1 shadow-soft ring-1 ring-ink-100 no-scrollbar sm:w-fit" role="tablist">
+      <div className="grid grid-cols-4 gap-1 rounded-full bg-white p-1 shadow-soft ring-1 ring-ink-100 sm:flex sm:w-fit" role="tablist">
         {TABS.map(({ id, label }) => (
           <button
             key={id}
             role="tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+            className={`flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-xs font-semibold transition sm:gap-2 sm:px-4 sm:text-sm ${
               tab === id ? "bg-ink-950 text-white" : "text-ink-600 hover:bg-ink-50"
             }`}
           >
             {label}
-            <span className={`rounded-full px-1.5 text-[11px] ${tab === id ? "bg-white/20" : "bg-ink-100"}`}>{groups[id].length}</span>
+            <span className={`hidden rounded-full px-1.5 text-[11px] sm:inline ${tab === id ? "bg-white/20" : "bg-ink-100"}`}>{groups[id].length}</span>
           </button>
         ))}
       </div>

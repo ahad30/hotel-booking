@@ -81,7 +81,7 @@ const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
         />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950/50 to-transparent" />
         {roomCount > 0 && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-ink-800 shadow-soft backdrop-blur">
+          <span className="absolute left-3 top-3 hidden items-center gap-1.5 rounded-full bg-white/90 sm:inline-flex px-3 py-1 text-xs font-semibold text-ink-800 shadow-soft backdrop-blur">
             <LuBedDouble className="h-3.5 w-3.5 text-brand-600" />
             {pluralize(roomCount, "room type")}
           </span>
