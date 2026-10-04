@@ -2,9 +2,7 @@
 
 A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **division → district → area**, check room availability, book rooms and pay online through **SSLCommerz**. Admins manage hotels, rooms, locations, bookings, users, homepage sliders and notifications from a dashboard.
 
-- **Live site:** https://behb-hotel-booking.vercel.app (mirror: https://behb-hotel-booking.netlify.app/)
-- **API:** https://hotel-booking-server-theta.vercel.app/api/v1
-- **API docs (Swagger UI):** `<backend-url>/api-docs`
+- **Live site:** https://behb-hotel-booking.vercel.app
 
 ---
 
