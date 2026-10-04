@@ -11,7 +11,7 @@ const RoomCard = ({
   checking,
   quantity,
   adults,
-  children,
+  childCount,
   onQuantity,
   onAdults,
   onChildren,
@@ -20,7 +20,7 @@ const RoomCard = ({
 }) => {
   // Guests allowed across every room of this type, as in the original booking rules.
   const guestCap = (room?.capacity + room?.child) * room?.roomQty;
-  const guestsFull = guestCap <= adults + children;
+  const guestsFull = guestCap <= adults + childCount;
 
   return (
     <article
@@ -107,10 +107,10 @@ const RoomCard = ({
               />
               <Stepper
                 label="Children"
-                value={children}
-                onDecrement={() => onChildren(children - 1)}
-                onIncrement={() => onChildren(children + 1)}
-                decDisabled={children <= 0 || selected}
+                value={childCount}
+                onDecrement={() => onChildren(childCount - 1)}
+                onIncrement={() => onChildren(childCount + 1)}
+                decDisabled={childCount <= 0 || selected}
                 incDisabled={guestsFull || selected}
               />
             </div>

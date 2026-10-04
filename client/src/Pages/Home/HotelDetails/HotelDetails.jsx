@@ -468,7 +468,7 @@ const HotelDetails = () => {
                       checking={Boolean(checkingAvailability[room.id])}
                       quantity={roomQuantities[room.id] || 1}
                       adults={adultCounts[room.id] ?? 0}
-                      children={childCounts[room.id] ?? 0}
+                      childCount={childCounts[room.id] ?? 0}
                       onQuantity={(v) => handleQuantityChange(room.id, v)}
                       onAdults={(v) => handleAdultCountChange(room.id, v)}
                       onChildren={(v) => handleChildCountChange(room.id, v)}
