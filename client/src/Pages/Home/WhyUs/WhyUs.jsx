@@ -34,7 +34,7 @@ const steps = [
 const WhyUs = () => (
   <>
     <section className="container-x pt-20 sm:pt-28">
-      <SectionHeader eyebrow="Why BEHB" title="Booking a hotel, minus the guesswork" />
+      <SectionHeader eyebrow="home.whyEyebrow" title="home.whyTitle" />
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {features.map(({ icon: Icon, title, text }) => (
           <div key={title} className="card group p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lift">

@@ -4,6 +4,7 @@ import SmartImage from "../../../components/ui/SmartImage";
 import Stepper from "../../../components/ui/Stepper";
 import { AmenityChip } from "../../../components/ui/amenities";
 import { formatTaka } from "../../../utils/format";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 const RoomCard = ({
   room,
@@ -18,6 +19,7 @@ const RoomCard = ({
   onToggle,
   onDetails,
 }) => {
+  const { t } = useI18n();
   // Guests allowed across every room of this type, as in the original booking rules.
   const guestCap = (room?.capacity + room?.child) * room?.roomQty;
   const guestsFull = guestCap <= adults + childCount;
@@ -58,7 +60,7 @@ const RoomCard = ({
                 <h3 className="text-xl font-bold text-ink-950">{room.type}</h3>
                 {room.isAvailable && (
                   <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100">
-                    Available
+                    {t("hotel.available")}
                   </span>
                 )}
               </div>
@@ -74,7 +76,7 @@ const RoomCard = ({
             </div>
             <div className="text-right">
               <p className="text-2xl font-extrabold text-ink-950">{formatTaka(room.price)}</p>
-              <p className="text-xs text-ink-500">per room / night</p>
+              <p className="text-xs text-ink-500">{t("hotel.perRoomNight")}</p>
             </div>
           </div>
 
@@ -117,7 +119,7 @@ const RoomCard = ({
 
             <div className="flex gap-2 sm:justify-end">
               <button onClick={onDetails} className="btn-ghost flex-1 sm:flex-none">
-                Details
+                {t("hotel.details")}
               </button>
               <button
                 onClick={onToggle}
@@ -133,9 +135,9 @@ const RoomCard = ({
                     <LuLoaderCircle className="h-4 w-4 animate-spin" /> Checking…
                   </>
                 ) : selected ? (
-                  "Remove"
+                  t("hotel.remove")
                 ) : (
-                  "Select room"
+                  t("hotel.selectRoom")
                 )}
               </button>
             </div>

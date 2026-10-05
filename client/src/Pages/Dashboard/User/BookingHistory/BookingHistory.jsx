@@ -202,7 +202,7 @@ const BookingHistory = () => {
                 ["Payment", selected.paymentStatus || "pending"],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-2xl bg-ink-50 p-3">
-                  <dt className="text-[11px] font-bold uppercase tracking-wider text-ink-400">{k}</dt>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-ink-500">{k}</dt>
                   <dd className="mt-0.5 truncate font-semibold capitalize text-ink-900">{v || "—"}</dd>
                 </div>
               ))}

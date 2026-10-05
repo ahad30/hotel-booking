@@ -28,6 +28,9 @@ const PaymentController = require('../controllers/paymentController');
 const InboxService = require('../services/Inbox/InboxService');
 const InboxController = require('../controllers/inboxController');
 const { auth, optionalAuth, selfOrAdmin } = require('../middleware/auth');
+const rateLimit = require('../middleware/rateLimit');
+const AssistantService = require('../services/Assistant/AssistantService');
+const AssistantController = require('../controllers/assistantController');
 const ApiError = require('../error/handleApiError');
 
 const router = express.Router();
@@ -55,6 +58,7 @@ const areaController = new AreaController(areaService)
 const paymentService = new PaymentService(prisma);
 const paymentController = new PaymentController(paymentService);
 const inboxController = new InboxController(new InboxService(prisma));
+const assistantController = new AssistantController(new AssistantService(prisma));
 //-------------------User Routes-----------------------
 router.post("/user/register",optionalAuth,async(req,res,next)=>{
     userController.createUser(req,res,next)
@@ -125,6 +129,19 @@ router.delete("/room/:id",auth("admin"), async(req,res,next)=>{
 })
 router.post("/room/checkAvailability",async(req,res,next)=>{
     roomController.checkAvailability(req,res,next)
+})
+
+// Public availability calendar: ?from=YYYY-MM-DD&days=1..62 (defaults: today, 42)
+router.get("/hotel/:hotelId/availability", async (req, res, next) => {
+    try {
+        const today = new Date().toISOString().slice(0, 10);
+        const from = /^\d{4}-\d{2}-\d{2}$/.test(req.query.from || "") && req.query.from >= today ? req.query.from : today;
+        const days = Math.min(62, Math.max(1, parseInt(req.query.days, 10) || 42));
+        const data = await bookingService.availabilityCalendar(req.params.hotelId, from, days);
+        res.status(200).json({ success: true, message: "Availability calendar", data });
+    } catch (error) {
+        next(error);
+    }
 })
 
 router.get("/hotel/:hotelId/rooms",async(req,res,next)=>{
@@ -282,5 +299,8 @@ router.delete("/contact/:id", auth("admin"), (req, res, next) => inboxController
 router.post("/subscribe/create", (req, res, next) => inboxController.subscribe(req, res, next));
 router.get("/subscriptions", auth("admin"), (req, res, next) => inboxController.getSubscribers(req, res, next));
 router.delete("/subscribe/:id", auth("admin"), (req, res, next) => inboxController.deleteSubscriber(req, res, next));
+
+//-------------------AI Trip Assistant-----------------------
+router.post("/assistant/search", rateLimit({ windowMs: 60_000, max: 8 }), (req, res, next) => assistantController.search(req, res, next));
 
 module.exports = router;

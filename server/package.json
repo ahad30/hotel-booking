@@ -6,15 +6,17 @@
   "scripts": {
     "start": "nodemon index.js",
     "seed": "node prisma/seed.js",
+    "seed:bd": "node prisma/seed-bangladesh.js",
     "vercel-build": "prisma generate",
     "postinstall": "prisma generate",
     "prisma:push": "prisma db push",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@prisma/client": "^6.3.1",
     "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",

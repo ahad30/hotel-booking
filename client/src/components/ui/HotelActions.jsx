@@ -1,9 +1,11 @@
 import { toast } from "sonner";
 import { LuGitCompareArrows, LuHeart } from "react-icons/lu";
 import { COMPARE_LIMIT, useCompare, useSaved } from "../../utils/localCollections";
+import { useI18n } from "../../i18n/LanguageProvider";
 
 // Save and compare toggles shown on hotel cards and the hotel page.
 const HotelActions = ({ hotel, variant = "overlay" }) => {
+  const { t } = useI18n();
   const saved = useSaved();
   const compare = useCompare();
   const isSaved = saved.has(hotel.id);
@@ -35,7 +37,7 @@ const HotelActions = ({ hotel, variant = "overlay" }) => {
         className={`${base} ${isSaved ? "text-rose-600" : "text-ink-700"}`}
       >
         <LuHeart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
-        {variant !== "overlay" && (isSaved ? "Saved" : "Save")}
+        {variant !== "overlay" && (isSaved ? t("hotel.saved") : t("hotel.save"))}
       </button>
       <button
         type="button"
@@ -45,7 +47,7 @@ const HotelActions = ({ hotel, variant = "overlay" }) => {
         className={`${base} ${isCompared ? "!bg-brand-600 text-white" : "text-ink-700"}`}
       >
         <LuGitCompareArrows className="h-4 w-4" />
-        {variant !== "overlay" && (isCompared ? "Comparing" : "Compare")}
+        {variant !== "overlay" && (isCompared ? t("hotel.comparing") : t("hotel.compare"))}
       </button>
     </div>
   );

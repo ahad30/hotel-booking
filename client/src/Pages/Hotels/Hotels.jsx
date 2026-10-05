@@ -8,7 +8,7 @@ import Modal from "../../components/ui/Modal";
 import SelectField from "../../components/ui/SelectField";
 import PriceRange from "./PriceRange";
 import { getAmenityIcon } from "../../components/ui/amenities";
-import { formatTaka, pluralize } from "../../utils/format";
+import { pluralize } from "../../utils/format";
 
 const SORTS = {
   recommended: { label: "Recommended", fn: () => 0 },

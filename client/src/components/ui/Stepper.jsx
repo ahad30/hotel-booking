@@ -14,7 +14,7 @@ const StepButton = ({ onClick, disabled, label, children }) => (
 
 const Stepper = ({ label, value, onDecrement, onIncrement, decDisabled, incDisabled }) => (
   <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-start sm:gap-1.5">
-    <span className="text-xs font-semibold uppercase tracking-wider text-ink-500">{label}</span>
+    <span className="text-xs font-semibold uppercase tracking-wider text-ink-600">{label}</span>
     <div className="flex items-center gap-2.5">
       <StepButton onClick={onDecrement} disabled={decDisabled} label={`Decrease ${label}`}>
         <LuMinus className="h-3.5 w-3.5" />

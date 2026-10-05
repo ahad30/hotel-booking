@@ -4,10 +4,12 @@ import { useAllHotels } from "../../../utils/useAllHotels";
 import { getAmenityIcon } from "../../../components/ui/amenities";
 import { pluralize } from "../../../utils/format";
 import SectionHeader from "../SectionHeader";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 // Each tile opens the hotel explorer pre-filtered to that amenity.
 const AmenityBrowse = () => {
   const { hotels, isLoading } = useAllHotels();
+  const { t } = useI18n();
 
   const counts = hotels.reduce((acc, h) => {
     (h.amenities || []).forEach((a) => (acc[a] = (acc[a] || 0) + 1));
@@ -20,12 +22,12 @@ const AmenityBrowse = () => {
   return (
     <section className="container-x pt-20 sm:pt-28">
       <SectionHeader
-        eyebrow="Amenities"
-        title="What matters on your trip?"
-        subtitle="Pick what you can't do without and we'll show the hotels that have it."
+        eyebrow="home.amenitiesEyebrow"
+        title="home.amenitiesTitle"
+        subtitle="home.amenitiesSubtitle"
         action={
           <Link to="/hotels" className="btn-ghost shrink-0">
-            All filters <LuArrowRight className="h-4 w-4" />
+            {t("common.allFilters")} <LuArrowRight className="h-4 w-4" />
           </Link>
         }
       />

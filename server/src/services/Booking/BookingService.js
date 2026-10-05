@@ -176,6 +176,48 @@ class BookingService {
         }, 0);
     }
 
+    // Free rooms per room type for each night in [from, from + days), using the
+    // same counting rules as checkAvailability so the calendar and checkout agree.
+    async availabilityCalendar(hotelId, from, days) {
+        const DAY = 24 * 60 * 60 * 1000;
+        const start = new Date(`${from}T00:00:00.000Z`);
+        const end = new Date(start.getTime() + days * DAY);
+        const rooms = await this.prisma.room.findMany({
+            where: { hotelId, isAvailable: true },
+            select: { id: true, type: true, price: true, roomQty: true },
+        });
+        const roomIds = rooms.map((r) => r.id);
+        const holdCutoff = new Date(Date.now() - HOLD_MINUTES * 60 * 1000);
+        const bookings = roomIds.length
+            ? await this.prisma.booking.findMany({
+                  where: {
+                      roomIds: { hasSome: roomIds },
+                      AND: [
+                          { checkIn: { lt: end } },
+                          { checkOut: { gt: start } },
+                          { status: { not: "cancelled" } },
+                          { paymentStatus: { not: "failed" } },
+                          { OR: [{ paymentStatus: "paid" }, { status: "confirmed" }, { createdAt: { gte: holdCutoff } }] },
+                      ],
+                  },
+                  select: { roomIds: true, bookingItem: true, checkIn: true, checkOut: true },
+              })
+            : [];
+
+        const nights = [];
+        for (let i = 0; i < days; i++) {
+            const night = new Date(start.getTime() + i * DAY);
+            const covering = bookings.filter((b) => b.checkIn <= night && b.checkOut > night);
+            const free = {};
+            for (const r of rooms) {
+                const booked = this.bookedQuantity(covering.filter((b) => b.roomIds.includes(r.id)), r.id);
+                free[r.id] = Math.max(0, (r.roomQty || 0) - booked);
+            }
+            nights.push({ date: night.toISOString().slice(0, 10), free });
+        }
+        return { hotelId, from, days, rooms, nights };
+    }
+
     // A room type is available while enough of its roomQty units are free.
     async checkAvailability({ roomId, checkIn, checkOut, quantity = 1 }) {
         const start = new Date(checkIn);

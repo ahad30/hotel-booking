@@ -145,7 +145,7 @@ const Checkout = () => {
                       { label: "Check-out", value: moment(checkOutDate).format("ddd, D MMM YYYY") },
                     ].map(({ label, value }) => (
                       <div key={label} className="rounded-2xl bg-ink-50 p-3">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-ink-400">{label}</p>
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-ink-500">{label}</p>
                         <p className="mt-0.5 font-semibold text-ink-900">{value}</p>
                       </div>
                     ))}

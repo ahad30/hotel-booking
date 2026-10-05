@@ -9,6 +9,8 @@ const theme = {
     colorBorder: "#d5dae2",
     controlHeightLG: 48,
     fontSizeLG: 15,
+    // Readable even when disabled (default #bfbfbf fails contrast).
+    colorTextDisabled: "#66738a",
   },
   components: {
     Select: {

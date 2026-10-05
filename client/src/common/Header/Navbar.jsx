@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LuBell, LuChevronDown, LuHeart, LuHistory, LuLayoutDashboard, LuLogOut, LuUser } from "react-icons/lu";
 import { useSaved } from "../../utils/localCollections";
+import { useI18n } from "../../i18n/LanguageProvider";
 import Logo from "../../components/ui/Logo";
 import { useAppDispatch, useAppSelector } from "../../redux/Hook/Hook";
 import { logout, useCurrentToken, useCurrentUser } from "../../redux/Feature/auth/authSlice";
@@ -15,11 +16,30 @@ export const useUnreadCount = () => {
 };
 
 const navLinks = [
-  { to: "/", label: "Home", end: true },
-  { to: "/hotels", label: "Hotels" },
-  { to: "/division", label: "Destinations" },
-  { to: "/contact", label: "Contact" },
+  { to: "/", key: "nav.home", end: true },
+  { to: "/hotels", key: "nav.hotels" },
+  { to: "/division", key: "nav.destinations" },
+  { to: "/contact", key: "nav.contact" },
 ];
+
+// EN / বাংলা switch; the label shows the language you'd switch to.
+const LanguageSwitch = ({ transparent }) => {
+  const { t, toggle, lang } = useI18n();
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={`${t("nav.language")}: ${t("nav.languageLabel")}`}
+      title={t("nav.languageLabel")}
+      lang={lang === "en" ? "bn" : "en"}
+      className={`rounded-full px-3 py-2 text-xs font-bold transition ${
+        transparent ? "bg-white/15 text-white hover:bg-white/25" : "bg-ink-100 text-ink-700 hover:bg-ink-200"
+      }`}
+    >
+      {t("nav.language")}
+    </button>
+  );
+};
 
 const SavedLink = ({ transparent }) => {
   const { ids } = useSaved();
@@ -125,6 +145,7 @@ const Navbar = () => {
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
   const unread = useUnreadCount();
+  const { t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
 
   const isHome = pathname === "/";
@@ -157,7 +178,7 @@ const Navbar = () => {
         <Logo light={transparent} />
 
         <ul className="hidden items-center gap-1 lg:flex">
-          {navLinks.map(({ to, label, end }) => (
+          {navLinks.map(({ to, key, end }) => (
             <li key={to}>
               <NavLink
                 to={to}
@@ -174,7 +195,7 @@ const Navbar = () => {
                   }`
                 }
               >
-                {label}
+                {t(key)}
               </NavLink>
             </li>
           ))}
@@ -186,13 +207,14 @@ const Navbar = () => {
                   transparent ? "text-white/80 hover:bg-white/10 hover:text-white" : "text-ink-600 hover:bg-ink-50 hover:text-ink-950"
                 }`}
               >
-                My bookings
+                {t("nav.myBookings")}
               </NavLink>
             </li>
           )}
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSwitch transparent={transparent} />
           <SavedLink transparent={transparent} />
 
           {isLoggedIn && user?.role === "admin" && (
@@ -202,7 +224,7 @@ const Navbar = () => {
                 transparent ? "bg-white/15 text-white hover:bg-white/25" : "bg-brand-50 text-brand-700 hover:bg-brand-100"
               }`}
             >
-              Dashboard
+              {t("nav.dashboard")}
             </Link>
           )}
 
@@ -233,7 +255,7 @@ const Navbar = () => {
                   transparent ? "text-white hover:bg-white/10" : "text-ink-700 hover:bg-ink-50"
                 }`}
               >
-                Log in
+                {t("nav.login")}
               </Link>
               <Link
                 to="/register"
@@ -241,7 +263,7 @@ const Navbar = () => {
                   transparent ? "bg-white text-ink-950 hover:bg-ink-100" : "bg-ink-950 text-white hover:bg-brand-700"
                 }`}
               >
-                Get started
+                {t("nav.getStarted")}
               </Link>
             </>
           )}

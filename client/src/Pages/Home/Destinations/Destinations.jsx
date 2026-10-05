@@ -3,6 +3,7 @@ import { LuArrowRight, LuArrowUpRight } from "react-icons/lu";
 import { useGetDivisionsQuery } from "../../../redux/Feature/User/place/placeApi";
 import SectionHeader from "../SectionHeader";
 import { divisionImage, divisionTagline } from "../divisionImages";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 // Bento grid order: Dhaka leads with the large tile, then Chattogram.
 const featured = ["dhaka", "chattagram", "chittagong"];
@@ -41,6 +42,7 @@ export const DivisionTile = ({ division, large = false, wide = false }) => {
 
 const Destinations = () => {
   const { data, isLoading } = useGetDivisionsQuery();
+  const { t } = useI18n();
   const rank = (d) => {
     const i = featured.indexOf(d.name.toLowerCase());
     return i === -1 ? featured.length : i;
@@ -50,12 +52,12 @@ const Destinations = () => {
   return (
     <section className="container-x pt-20 sm:pt-28">
       <SectionHeader
-        eyebrow="Destinations"
-        title="Explore Bangladesh by division"
-        subtitle="Pick a division, narrow it down to a district and area, and see every hotel there."
+        eyebrow="home.destEyebrow"
+        title="home.destTitle"
+        subtitle="home.destSubtitle"
         action={
           <Link to="/division" className="btn-ghost shrink-0">
-            All destinations <LuArrowRight className="h-4 w-4" />
+            {t("common.allDestinations")} <LuArrowRight className="h-4 w-4" />
           </Link>
         }
       />

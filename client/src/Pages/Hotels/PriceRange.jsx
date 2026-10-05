@@ -56,7 +56,7 @@ const PriceRange = ({ bounds, value, onCommit }) => {
           { label: "Max", index: 1 },
         ].map(({ label, index }) => (
           <label key={label} className="block">
-            <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-400">{label}</span>
+            <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-500">{label}</span>
             <InputNumber
               value={range[index]}
               min={lo}

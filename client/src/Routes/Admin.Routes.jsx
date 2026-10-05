@@ -19,7 +19,6 @@ const EditRoom = lazy(() => import("../Pages/Dashboard/Admin/Room/EditRoom"));
 const Bookings = lazy(() => import("../Pages/Dashboard/Admin/Bookings/Bookings"));
 const AddNotification = lazy(() => import("../Pages/Dashboard/Admin/AddNotification/AddNotification"));
 const Area = lazy(() => import("../Pages/Dashboard/Admin/Area/Area"));
-const EditSlider = lazy(() => import("../Pages/Dashboard/Admin/Slider/EditSlider"));
 const Contact = lazy(() => import("../Pages/Dashboard/Admin/Contact/Contact"));
 const Subscription = lazy(() => import("../Pages/Dashboard/Admin/Subscription/Subscription"));
 

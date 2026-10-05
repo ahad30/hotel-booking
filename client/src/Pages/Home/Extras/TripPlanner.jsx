@@ -31,7 +31,7 @@ const TripPlanner = () => {
 
   return (
     <section className="container-x pt-20 sm:pt-28">
-      <SectionHeader eyebrow="Plan" title="Estimate your stay in seconds" subtitle="Pick a hotel and room, adjust nights and rooms, and see the total before you book." />
+      <SectionHeader eyebrow="home.planEyebrow" title="home.planTitle" subtitle="home.planSubtitle" />
       <div className="mt-10 grid overflow-hidden rounded-4xl border border-ink-100 bg-white shadow-soft lg:grid-cols-[1.3fr_1fr]">
         <div className="space-y-6 p-6 sm:p-8">
           {isLoading ? (

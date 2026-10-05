@@ -2,11 +2,13 @@ import { useState } from "react";
 import { LuCircleCheck, LuLoaderCircle, LuMail } from "react-icons/lu";
 import { toast } from "sonner";
 import { useAddSubscriptionMutation } from "../../../redux/Feature/Admin/subscribe/subscribeApi";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 const Newsletter = () => {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const [subscribe, { isLoading }] = useAddSubscriptionMutation();
+  const { t } = useI18n();
 
   const submit = async (e) => {
     e.preventDefault();
@@ -28,13 +30,13 @@ const Newsletter = () => {
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-600">
                 <LuMail className="h-6 w-6" />
               </span>
-              <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-ink-950">Get hotel deals in your inbox</h2>
-              <p className="mt-2 text-ink-500">New hotels and seasonal offers from BEHB. No spam.</p>
+              <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-ink-950">{t("home.newsTitle")}</h2>
+              <p className="mt-2 text-ink-500">{t("home.newsSubtitle")}</p>
             </div>
             {done ? (
               <div className="flex items-center gap-3 rounded-3xl bg-emerald-50 p-5 text-emerald-800 ring-1 ring-emerald-100" role="status">
                 <LuCircleCheck className="h-6 w-6 shrink-0" />
-                <p className="font-semibold">You&apos;re subscribed. Watch your inbox for deals.</p>
+                <p className="font-semibold">{t("home.newsDone")}</p>
               </div>
             ) : (
               <form onSubmit={submit} className="flex flex-col gap-3 sm:flex-row">
@@ -50,7 +52,7 @@ const Newsletter = () => {
                 />
                 <button type="submit" disabled={isLoading} className="btn-brand py-3.5">
                   {isLoading && <LuLoaderCircle className="h-4 w-4 animate-spin" />}
-                  Subscribe
+                  {t("home.newsSubmit")}
                 </button>
               </form>
             )}
