@@ -2,6 +2,9 @@
 const fontStack = ['"Plus Jakarta Sans"', "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"];
 
 export default {
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {

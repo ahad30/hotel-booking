@@ -14,6 +14,30 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* No font boosting on rotation, no grey tap flash, no sideways scroll or bounce. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    overflow-x: clip;
+    overscroll-behavior-y: none;
+  }
+
+  /* iOS zooms the page when a field under 16px is focused; that zoom is what
+     lets the page shake and scroll sideways. Keep fields at 16px on phones. */
+  @media (max-width: 767px) {
+    input,
+    select,
+    textarea,
+    .ant-select-selection-search-input,
+    .ant-input,
+    .ant-input-number-input {
+      font-size: 16px !important;
+    }
   }
 
   body {
@@ -132,6 +156,21 @@
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
+  }
+}
+
+/* Mobile fixed bars: the tab bar clears the home indicator, and the
+   compare bar always sits above the tab bar. */
+.safe-bottom {
+  bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+.compare-tray-offset {
+  /* tab bar: 0.75rem offset + ~4.6rem tall; leave a clear ~1.25rem gap above it */
+  bottom: calc(6.75rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .compare-tray-offset {
+    bottom: 1.5rem;
   }
 }
 

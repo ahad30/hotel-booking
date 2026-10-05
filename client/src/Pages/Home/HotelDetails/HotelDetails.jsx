@@ -525,7 +525,7 @@ const HotelDetails = () => {
       </div>
 
       {/* Mobile booking bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-white/95 px-4 py-3 shadow-lift backdrop-blur-xl lg:hidden" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-white px-4 py-3 shadow-lift lg:hidden" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}>
         <div className="flex items-center justify-between gap-4">
           <button onClick={() => setDatesOpen(true)} className="min-w-0 text-left">
             {selectedRooms.length ? (

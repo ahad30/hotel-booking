@@ -35,8 +35,7 @@ const BottomHeader = () => {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-3 bottom-3 z-50 rounded-3xl border border-ink-100 bg-white/90 shadow-lift backdrop-blur-xl lg:hidden"
-      style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+      className="safe-bottom fixed inset-x-3 z-50 rounded-3xl border border-ink-100 bg-white shadow-lift lg:hidden"
     >
       <ul className={`grid ${tabs.length === 4 ? "grid-cols-4" : "grid-cols-5"}`}>
         {tabs.map(({ to, label, icon: Icon, end, badge }) => (

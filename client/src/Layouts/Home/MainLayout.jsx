@@ -7,7 +7,7 @@ import PageLoader from "../../components/ui/PageLoader";
 import CompareTray from "../../components/ui/CompareTray";
 
 // Pages that were not redesigned as full-width layouts get a padded container.
-const contained = ["/notification", "/privacy-policy", "/verify", "/home-division"];
+const contained = ["/notification", "/verify", "/home-division"];
 const noFooter = ["/login", "/register", "/checkout"];
 
 const MainLayout = () => {
