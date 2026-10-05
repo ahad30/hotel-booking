@@ -279,12 +279,17 @@ The server's CORS settings allow `http://localhost:5173` and `http://localhost:5
 |---|---|
 | `DATABASE_URL` | MongoDB connection string used by Prisma |
 | `PORT` | API port (default `5000`) |
-| `BACKEND_URL` | Public URL of the API, used for SSLCommerz callback URLs (default `http://localhost:5000`) |
-| `FRONTEND_URL` | Public URL of the client (default `http://localhost:3000`) |
+| `SERVER_URL` | Public URL of the API, used for SSLCommerz callback URLs (default `http://localhost:5000`) |
+| `CLIENT_URL` | Public URL of the client, where customers return after payment (default `http://localhost:5173`) |
+| `JWT_SECRET` | **Required.** Long random string used to sign login tokens |
+| `JWT_EXPIRES_IN` | Login token lifetime (default `7d`) |
+| `DEMO_ADMIN_PHONE` | Optional. Phone number of a demo admin that can browse the dashboard but not change data |
 | `SSLCOMMERZ_STORE_ID` | SSLCommerz store ID |
 | `SSLCOMMERZ_STORE_PASSWORD` | SSLCommerz store password |
 | `SSLCOMMERZ_IS_LIVE` | `true` for production, `false` for sandbox |
-| `SSLCOMMERZ_SUCCESS_URL` | Payment success callback URL |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` | Optional. Mail server used for verification emails |
+
+Copy `server/.env.example` and `client/.env.example` to get started.
 
 ### `client/.env`
 
