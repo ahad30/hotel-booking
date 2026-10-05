@@ -13,8 +13,8 @@ const CompareTray = () => {
   if (!picked.length || pathname === "/compare" || pathname === "/checkout") return null;
 
   return (
-    <div className={`fixed inset-x-3 bottom-24 z-40 mx-auto max-w-3xl animate-fade-up lg:bottom-6 ${pathname.startsWith("/hotel-details") ? "hidden lg:block" : ""}`}>
-      <div className="flex items-center gap-3 rounded-3xl border border-ink-800 bg-ink-950/95 p-3 pl-4 text-white shadow-lift backdrop-blur">
+    <div className={`compare-tray-offset fixed inset-x-3 z-40 mx-auto max-w-3xl animate-fade-up ${pathname.startsWith("/hotel-details") ? "hidden lg:block" : ""}`}>
+      <div className="flex items-center gap-3 rounded-3xl border border-ink-800 bg-ink-950 p-3 pl-4 text-white shadow-lift">
         <div className="hidden text-sm font-semibold sm:block">
           Compare <span className="text-ink-400">({picked.length}/{COMPARE_LIMIT})</span>
         </div>

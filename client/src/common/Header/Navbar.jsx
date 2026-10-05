@@ -150,7 +150,7 @@ const Navbar = () => {
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         transparent
           ? "bg-gradient-to-b from-ink-950/50 to-transparent"
-          : "border-b border-ink-100/80 bg-white/85 shadow-soft backdrop-blur-xl"
+          : "border-b border-ink-100/80 bg-white shadow-soft md:bg-white/85 md:backdrop-blur-xl"
       }`}
     >
       <nav className="container-x flex h-[72px] items-center justify-between gap-4">
