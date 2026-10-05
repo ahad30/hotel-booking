@@ -32,7 +32,14 @@ const notificationApi = baseApi.injectEndpoints({
       invalidatesTags: ['notification'],
     }),
 
-
+    // Mark every notification of a user as read
+    markAllNotificationsAsRead: builder.mutation({
+      query: (userId) => ({
+        url: `/notification/user/${userId}/read-all`,
+        method: "PUT",
+      }),
+      invalidatesTags: ['notification'],
+    }),
   }),
 });
 
@@ -40,6 +47,7 @@ export const {
   useCreateNotificationMutation,
   useGetUserNotificationsQuery,
   useMarkNotificationAsReadMutation,
+  useMarkAllNotificationsAsReadMutation,
 //   useGetUnreadNotificationsCountQuery,
 } = notificationApi;
 

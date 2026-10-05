@@ -31,6 +31,15 @@ async createNotification(req, res, next) {
       next(err);
     }
   }
+
+  async markAllAsRead(req, res, next) {
+    try {
+      const result = await this.notificationService.markAllAsRead(req.params.userId);
+      ResponseHandler.success(res, "All notifications marked as read", { updated: result.count });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = NotificationController;

@@ -189,6 +189,9 @@ router.get("/notification/:userId", (req, res, next) => {
 }
 )
 //[route("/notification/{id}")]
+router.put("/notification/user/:userId/read-all", (req, res, next) => {
+    notificationController.markAllAsRead(req, res, next)
+})
 router.put("/notification/:id/read", (req, res, next) => {
     notificationController.markAsRead(req, res, next)
 }

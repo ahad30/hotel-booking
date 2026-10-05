@@ -36,7 +36,7 @@ const promises = [
 ];
 
 const Footer = () => (
-  <footer className="relative overflow-hidden bg-ink-950 pb-28 text-ink-300 lg:pb-0">
+  <footer className="relative overflow-hidden bg-ink-950 pb-[calc(7rem+var(--tray-space,0px))] text-ink-300 lg:pb-0">
     <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[60rem] -translate-x-1/2 rounded-full bg-brand-600/20 blur-3xl" />
     <div className="container-x relative py-16">
       <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
