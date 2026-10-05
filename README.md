@@ -30,6 +30,13 @@ A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **di
 - Fully responsive: a transparent navbar over the hero photo on desktop, and a floating tab bar plus bottom booking bar on phones.
 - Accessible details: keyboard-friendly modals and photo viewer (Escape and arrow keys), visible focus rings, ARIA labels, and support for reduced-motion settings.
 
+### Security
+- **JWT authentication** on every private endpoint, with role-based access: admin-only management routes, and "self or admin" for a user's own profile, bookings and notifications.
+- **No secrets in responses or code:** password hashes are never returned, credentials live in environment variables (see `server/.env.example`), and public sign-up cannot create admin accounts.
+- **Payments are verified server-side:** SSLCommerz callbacks are confirmed with the SSLCommerz validation API (status, transaction ID and amount) before a booking is marked paid.
+- **Availability is re-checked at checkout**, per room type and quantity, before the customer is sent to payment.
+- **Read-only demo admin** (`DEMO_ADMIN_PHONE`) so the public demo can't change live data.
+
 ### Performance
 Measured on the production build of the home page:
 
@@ -344,4 +351,6 @@ Sign in at [behb-hotel-booking.vercel.app/login](https://behb-hotel-booking.verc
 
 | Role | Phone | Password |
 |---|---|---|
-| Admin | `01883687463` | `123456` |
+| Admin (read-only demo) | `01000000000` | `Demo@1234` |
+
+This account can open every dashboard page, but the API refuses any change it tries to make, so the live data stays intact.
