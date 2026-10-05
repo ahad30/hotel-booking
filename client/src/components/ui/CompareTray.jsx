@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LuArrowRight, LuX } from "react-icons/lu";
 import { COMPARE_LIMIT, useCompare } from "../../utils/localCollections";
@@ -10,7 +11,15 @@ const CompareTray = () => {
   const { byId } = useAllHotels();
 
   const picked = compare.ids.map((id) => byId.get(id)).filter(Boolean);
-  if (!picked.length || pathname === "/compare" || pathname === "/checkout") return null;
+  const visible = picked.length > 0 && pathname !== "/compare" && pathname !== "/checkout";
+
+  // Tells the footer how much extra bottom space to leave so the bar never covers it.
+  useEffect(() => {
+    document.documentElement.style.setProperty("--tray-space", visible ? "5.5rem" : "0px");
+    return () => document.documentElement.style.setProperty("--tray-space", "0px");
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <div className={`compare-tray-offset fixed inset-x-3 z-40 mx-auto max-w-3xl animate-fade-up ${pathname.startsWith("/hotel-details") ? "hidden lg:block" : ""}`}>

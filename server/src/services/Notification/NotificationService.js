@@ -16,6 +16,14 @@ class NotificationService {
       });
     }
   
+    // Marks every unread notification for one user as read in a single query.
+    async markAllAsRead(userId) {
+      return await this.prisma.notification.updateMany({
+        where: { userId, isRead: false },
+        data: { isRead: true }
+      });
+    }
+
     async getUserNotifications(userId) {
       return await this.prisma.notification.findMany({
         where: { userId },
