@@ -4,7 +4,7 @@ import { logout, useCurrentToken, useCurrentUser } from "../../redux/Feature/aut
 import { useAppDispatch, useAppSelector } from "../../redux/Hook/Hook";
 import LoadingPage from "../../components/LoadingPage";
 import SessionCheckFailed from "../SessionCheckFailed";
-import { useGetUserQuery } from "../../redux/Feature/auth/authApi";
+import { useGetMeQuery } from "../../redux/Feature/auth/authApi";
 
 const homeForRole = (role) => (role === "admin" ? "/admin/home" : "/");
 
@@ -14,11 +14,12 @@ const ProtectedRoutes = ({ children, role }) => {
   const [loading, setLoading] = useState(true);
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
-  const { data, isLoading, isFetching, isError, refetch } = useGetUserQuery();
+  const { data, error, isLoading, isFetching, isError, refetch } = useGetMeQuery(undefined, { skip: !token });
 
-  // Matched by id: email is optional on accounts, so it can't identify a user.
-  const loggedInUser = data?.data?.find((u) => u.id === user?.id);
-  const accountMissing = Boolean(data?.data) && !isFetching && !loading && !loggedInUser;
+  // The API resolves the account from the token; a mismatch means a stale session.
+  const loggedInUser = data?.data && user?.id && data.data.id === user.id ? data.data : null;
+  const accountMissing =
+    (Boolean(data?.data) && !isFetching && !loading && !loggedInUser) || error?.status === 404 || error?.status === 401;
 
   useEffect(() => {
     if (user && token) {
@@ -40,8 +41,8 @@ const ProtectedRoutes = ({ children, role }) => {
     return <LoadingPage />;
   }
 
-  // The user list couldn't be loaded (API down, offline): keep the session.
-  if (isError || !data?.data) {
+  // The account check couldn't reach the API (down, offline): keep the session.
+  if ((isError && !accountMissing) || (!data?.data && !accountMissing)) {
     return <SessionCheckFailed onRetry={refetch} />;
   }
 

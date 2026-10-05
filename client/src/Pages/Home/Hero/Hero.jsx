@@ -1,15 +1,18 @@
 import { LuBadgeCheck, LuCreditCard, LuZap } from "react-icons/lu";
 import SearchPanel from "./SearchPanel";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 const HERO = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop";
 
 const trust = [
-  { icon: LuZap, text: "Live room availability" },
-  { icon: LuCreditCard, text: "Secure SSLCommerz checkout" },
-  { icon: LuBadgeCheck, text: "Instant booking confirmation" },
+  { icon: LuZap, text: "hero.trust1" },
+  { icon: LuCreditCard, text: "hero.trust2" },
+  { icon: LuBadgeCheck, text: "hero.trust3" },
 ];
 
-const Hero = () => (
+const Hero = () => {
+  const { t } = useI18n();
+  return (
   <section className="relative isolate flex min-h-[640px] items-end overflow-hidden pb-14 pt-32 sm:min-h-[720px] lg:min-h-[760px] lg:pb-20">
     {/* Same URLs as the <link rel="preload"> tags in index.html, so the browser reuses them. */}
     <img
@@ -29,15 +32,15 @@ const Hero = () => (
       <div className="max-w-3xl animate-fade-up">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          Booking stays across all 8 divisions of Bangladesh
+          {t("hero.badge")}
         </span>
         <h1 className="mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
-          Find a stay that
+          {t("hero.title1")}
           <br />
-          <span className="bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">feels like yours.</span>
+          <span className="bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("hero.title2")}</span>
         </h1>
         <p className="mt-5 max-w-xl text-base text-white/80 sm:text-lg">
-          Compare hotels, check real-time room availability and pay securely — from Dhaka's skyline to Sylhet's tea hills.
+          {t("hero.subtitle")}
         </p>
       </div>
 
@@ -49,12 +52,13 @@ const Hero = () => (
         {trust.map(({ icon: Icon, text }) => (
           <li key={text} className="flex items-center gap-2 text-sm font-medium text-white/85">
             <Icon className="h-4 w-4 text-cyan-300" />
-            {text}
+            {t(text)}
           </li>
         ))}
       </ul>
     </div>
   </section>
-);
+  );
+};
 
 export default Hero;

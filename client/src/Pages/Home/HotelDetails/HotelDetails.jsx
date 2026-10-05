@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./datepicker.css";
@@ -25,6 +25,8 @@ import { useAppDispatch } from "../../../redux/Hook/Hook";
 import { setBookingDetails } from "../../../redux/Booking/bookingSlice";
 import RoomGallery from "./RoomGallery";
 import RoomCard from "./RoomCard";
+import AvailabilityCalendar from "./AvailabilityCalendar";
+import { useI18n } from "../../../i18n/LanguageProvider";
 import HotelActions from "../../../components/ui/HotelActions";
 import { trackRecentlyViewed } from "../../../utils/localCollections";
 import Modal from "../../../components/ui/Modal";
@@ -45,7 +47,7 @@ const DateRange = ({ checkIn, checkOut, onChange }) => (
         key={label}
         className={`block cursor-pointer px-4 py-3 transition hover:bg-ink-50 ${isCheckIn ? "rounded-l-2xl border-r border-ink-200" : "rounded-r-2xl"}`}
       >
-        <span className="block text-[11px] font-bold uppercase tracking-wider text-ink-400">{label}</span>
+        <span className="block text-[11px] font-bold uppercase tracking-wider text-ink-500">{label}</span>
         <DatePicker
           selected={selected}
           onChange={(date) => date && onChange(date, isCheckIn)}
@@ -119,6 +121,7 @@ const DetailsSkeleton = () => (
 );
 
 const HotelDetails = () => {
+  const { t } = useI18n();
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -128,8 +131,17 @@ const HotelDetails = () => {
 
   const [checkingAvailability, setCheckingAvailability] = useState({});
   const [selectedRooms, setSelectedRooms] = useState([]);
-  const [checkInDate, setCheckInDate] = useState(startOfDay(new Date()));
-  const [checkOutDate, setCheckOutDate] = useState(addDays(startOfDay(new Date()), 1));
+  // Dates can arrive in the link (e.g. from the AI assistant): ?checkIn=YYYY-MM-DD&checkOut=YYYY-MM-DD
+  const [searchParams] = useSearchParams();
+  const [checkInDate, setCheckInDate] = useState(() => {
+    const d = searchParams.get("checkIn") && startOfDay(new Date(`${searchParams.get("checkIn")}T00:00:00`));
+    return d && !Number.isNaN(d.getTime()) && !isAfter(startOfDay(new Date()), d) ? d : startOfDay(new Date());
+  });
+  const [checkOutDate, setCheckOutDate] = useState(() => {
+    const d = searchParams.get("checkOut") && startOfDay(new Date(`${searchParams.get("checkOut")}T00:00:00`));
+    const minOut = addDays(checkInDate, 1);
+    return d && !Number.isNaN(d.getTime()) && !isAfter(minOut, d) ? d : minOut;
+  });
   const [currentRoom, setCurrentRoom] = useState(null);
   const [datesOpen, setDatesOpen] = useState(false);
   const [roomQuantities, setRoomQuantities] = useState({});
@@ -350,25 +362,25 @@ const HotelDetails = () => {
             </div>
           ))}
           <div className="flex items-center justify-between border-t border-dashed border-ink-200 pt-3">
-            <p className="font-bold text-ink-950">Total</p>
+            <p className="font-bold text-ink-950">{t("hotel.total")}</p>
             <p className="text-xl font-extrabold text-ink-950">{formatTaka(totalPrice)}</p>
           </div>
           <button onClick={handleCheckout} className="btn-brand w-full py-3.5 text-base">
-            Reserve {pluralize(roomsBooked, "room")} <LuArrowRight className="h-4 w-4" />
+            {t("hotel.reserve")} · {pluralize(roomsBooked, "room")} <LuArrowRight className="h-4 w-4" />
           </button>
         </div>
       ) : (
         <div className="mt-5 rounded-2xl bg-ink-50 p-4 text-center">
-          <p className="text-sm font-semibold text-ink-700">No rooms selected yet</p>
-          <p className="mt-1 text-xs text-ink-500">Choose a room below to see your total.</p>
+          <p className="text-sm font-semibold text-ink-700">{t("hotel.noRooms")}</p>
+          <p className="mt-1 text-xs text-ink-500">{t("hotel.noRoomsHint")}</p>
           <button onClick={scrollToRooms} className="btn-primary mt-3 w-full">
-            See rooms
+            {t("hotel.seeRooms")}
           </button>
         </div>
       )}
 
       <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-ink-500">
-        <LuShieldCheck className="h-4 w-4 text-emerald-600" /> Secure payment with SSLCommerz
+        <LuShieldCheck className="h-4 w-4 text-emerald-600" /> {t("hotel.securePayment")}
       </p>
     </>
   );
@@ -399,7 +411,7 @@ const HotelDetails = () => {
           <div className="flex flex-wrap gap-2">
             <HotelActions hotel={hotel} variant="inline" />
             <button onClick={handleShare} className="btn-ghost w-fit">
-              <LuShare2 className="h-4 w-4" /> Share
+              <LuShare2 className="h-4 w-4" /> {t("hotel.share")}
             </button>
           </div>
         </div>
@@ -431,14 +443,14 @@ const HotelDetails = () => {
 
             {hotel.description && (
               <section>
-                <h2 className="text-xl font-bold text-ink-950">About this hotel</h2>
+                <h2 className="text-xl font-bold text-ink-950">{t("hotel.about")}</h2>
                 <p className="mt-3 whitespace-pre-line leading-relaxed text-ink-600">{hotel.description}</p>
               </section>
             )}
 
             {hotel.amenities?.length > 0 && (
               <section>
-                <h2 className="text-xl font-bold text-ink-950">What this place offers</h2>
+                <h2 className="text-xl font-bold text-ink-950">{t("hotel.offers")}</h2>
                 <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {hotel.amenities.map((a) => {
                     const Icon = getAmenityIcon(a);
@@ -455,14 +467,18 @@ const HotelDetails = () => {
             <section id="rooms" className="scroll-mt-24">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-bold text-ink-950">Choose your room</h2>
+                  <h2 className="text-xl font-bold text-ink-950">{t("hotel.chooseRoom")}</h2>
                   <p className="mt-1 text-sm text-ink-500">
                     {shortDate(checkInDate)} → {shortDate(checkOutDate)} · {pluralize(nights, "night")}
                   </p>
                 </div>
                 <button onClick={() => setDatesOpen(true)} className="btn-ghost lg:hidden">
-                  <LuCalendarDays className="h-4 w-4" /> Change dates
+                  <LuCalendarDays className="h-4 w-4" /> {t("hotel.changeDates")}
                 </button>
+              </div>
+
+              <div className="mt-5">
+                <AvailabilityCalendar hotelId={hotel.id} checkIn={checkInDate} checkOut={checkOutDate} onSelect={setStay} />
               </div>
 
               <div className="mt-5 space-y-5">
@@ -490,7 +506,7 @@ const HotelDetails = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-ink-950">Where you&apos;ll be</h2>
+              <h2 className="text-xl font-bold text-ink-950">{t("hotel.where")}</h2>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500">
                 <LuMapPin className="h-4 w-4" /> {hotel.location}
               </p>
@@ -509,8 +525,8 @@ const HotelDetails = () => {
             </section>
 
             <section className="card p-6">
-              <h2 className="text-lg font-bold text-ink-950">Questions before you book?</h2>
-              <p className="mt-1 text-sm text-ink-500">Message us and we&apos;ll help you pick the right room.</p>
+              <h2 className="text-lg font-bold text-ink-950">{t("hotel.questions")}</h2>
+              <p className="mt-1 text-sm text-ink-500">{t("hotel.questionsText")}</p>
               <div className="mt-4 max-w-sm">
                 <HelpLinks />
               </div>
@@ -541,11 +557,11 @@ const HotelDetails = () => {
           </button>
           {selectedRooms.length ? (
             <button onClick={handleCheckout} className="btn-brand shrink-0">
-              Reserve {roomsBooked} <LuArrowRight className="h-4 w-4" />
+              {t("hotel.reserve")} {roomsBooked} <LuArrowRight className="h-4 w-4" />
             </button>
           ) : (
             <button onClick={scrollToRooms} className="btn-primary shrink-0">
-              Select rooms
+              {t("hotel.selectRooms")}
             </button>
           )}
         </div>

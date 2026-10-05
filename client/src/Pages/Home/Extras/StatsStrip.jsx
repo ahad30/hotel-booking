@@ -2,18 +2,20 @@ import { LuBedDouble, LuBuilding2, LuMapPinned, LuWallet } from "react-icons/lu"
 import { useAllHotels } from "../../../utils/useAllHotels";
 import { useGetDivisionsQuery } from "../../../redux/Feature/User/place/placeApi";
 import { formatTaka } from "../../../utils/format";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 // Live numbers from the API, so they always match what's bookable.
 const StatsStrip = () => {
   const { hotels, isLoading } = useAllHotels();
   const { data: divisions } = useGetDivisionsQuery();
+  const { t } = useI18n();
 
   const prices = hotels.map((h) => h.fromPrice).filter(Boolean);
   const stats = [
-    { icon: LuBuilding2, value: hotels.length, label: "Hotels to book" },
-    { icon: LuBedDouble, value: hotels.reduce((s, h) => s + (h.rooms?.length || 0), 0), label: "Room types" },
-    { icon: LuMapPinned, value: divisions?.data?.length ?? "—", label: "Divisions covered" },
-    { icon: LuWallet, value: prices.length ? formatTaka(Math.min(...prices)) : "—", label: "Rooms from, per night" },
+    { icon: LuBuilding2, value: hotels.length, label: t("stats.hotels") },
+    { icon: LuBedDouble, value: hotels.reduce((s, h) => s + (h.rooms?.length || 0), 0), label: t("stats.roomTypes") },
+    { icon: LuMapPinned, value: divisions?.data?.length ?? "—", label: t("stats.divisions") },
+    { icon: LuWallet, value: prices.length ? formatTaka(Math.min(...prices)) : "—", label: t("stats.from") },
   ];
 
   return (

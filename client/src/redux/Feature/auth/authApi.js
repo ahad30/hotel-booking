@@ -35,6 +35,14 @@ const authApi = baseApi.injectEndpoints({
       providesTags: ['users'],
     }),
 
+    // The signed-in account (from the token)
+    getMe: builder.query({
+      query: () => ({
+        url: "/user/me",
+      }),
+      providesTags: ['users'],
+    }),
+
     // Get user by ID
     getUserById: builder.query({
       query: (id) => ({
@@ -79,6 +87,7 @@ export const {
   useRegisterMutation, 
   useGetUserQuery, 
   useGetUserByIdQuery, 
+  useGetMeQuery,
   useUpdateUserMutation, 
   useDeleteUserMutation,
   useVerifyEmailMutation 

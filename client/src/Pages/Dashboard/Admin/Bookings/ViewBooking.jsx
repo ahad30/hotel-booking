@@ -222,4 +222,6 @@ const ViewBooking = forwardRef(({ selectedBooking, onPrint }, ref) => {
   );
 });
 
+ViewBooking.displayName = "ViewBooking";
+
 export default ViewBooking;

@@ -38,7 +38,7 @@ const BannerSlider = () => {
 
   return (
     <section className="container-x pt-16 sm:pt-20">
-      <SectionHeader eyebrow="Deals" title="Offers on hotels right now" />
+      <SectionHeader eyebrow="home.dealsEyebrow" title="home.dealsTitle" />
       <div
         className="group relative mt-8 overflow-hidden rounded-4xl bg-ink-100 shadow-soft"
         onMouseEnter={() => setPaused(true)}
@@ -98,15 +98,18 @@ const BannerSlider = () => {
                 <Icon className="h-5 w-5" />
               </button>
             ))}
-            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-ink-950/30 px-2.5 py-1.5 backdrop-blur">
+            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-0.5 rounded-full bg-ink-950/30 px-1.5 py-0.5 backdrop-blur">
               {slides.map((s, i) => (
                 <button
                   key={s.id}
                   onClick={() => goTo(i)}
                   aria-label={`Go to offer ${i + 1}`}
                   aria-current={i === active}
-                  className={`h-1.5 rounded-full transition-all ${i === active ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"}`}
-                />
+                  className="group/dot grid h-6 min-w-6 place-items-center"
+                >
+                  {/* Small dot, full-size tap target. */}
+                  <span className={`block h-1.5 rounded-full transition-all ${i === active ? "w-6 bg-white" : "w-1.5 bg-white/50 group-hover/dot:bg-white/80"}`} />
+                </button>
               ))}
             </div>
           </>

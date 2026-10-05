@@ -7,7 +7,7 @@
 
 @layer base {
   * {
-    font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: "Plus Jakarta Sans", "Hind Siliguri", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
 
   html {
@@ -157,6 +157,14 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* Bangla script needs more vertical room than the tight Latin display settings. */
+:lang(bn) h1,
+:lang(bn) h2,
+:lang(bn) h3 {
+  line-height: 1.35;
+  letter-spacing: 0;
 }
 
 /* Mobile fixed bars: the tab bar clears the home indicator, and the

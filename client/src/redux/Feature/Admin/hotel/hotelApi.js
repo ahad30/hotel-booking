@@ -59,6 +59,15 @@ const hotelApi = baseApi.injectEndpoints({
       providesTags: ['hotels']
     }),
 
+    // Free rooms per room type for each night (public)
+    getHotelAvailability: builder.query({
+      query: ({ hotelId, from, days = 56 }) => ({
+        url: `/hotel/${hotelId}/availability`,
+        params: { from, days },
+      }),
+      providesTags: ['booking'],
+    }),
+
     // Update Hotel
     updateHotel: builder.mutation({
       query: ({ id, data }) => ({
@@ -89,6 +98,7 @@ export const {
   useGetHotelsBySearchQuery,
   useGetHotelByIdQuery,
   useGetHotelByAreaQuery,
+  useGetHotelAvailabilityQuery,
   useUpdateHotelMutation,
   useDeleteHotelMutation,
 } = hotelApi;

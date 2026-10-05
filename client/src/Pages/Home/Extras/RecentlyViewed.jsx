@@ -14,8 +14,8 @@ const RecentlyViewed = () => {
   return (
     <section className="container-x pt-20 sm:pt-28">
       <SectionHeader
-        eyebrow="Pick up where you left off"
-        title="Recently viewed"
+        eyebrow="home.recentEyebrow"
+        title="home.recentTitle"
         action={
           <button onClick={recent.clear} className="btn-ghost shrink-0">
             Clear history

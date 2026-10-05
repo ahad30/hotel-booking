@@ -1,0 +1,12 @@
+{
+  "name": "behb-e2e",
+  "private": true,
+  "description": "End-to-end tests for the BEHB client, run against a production build with a mocked API.",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

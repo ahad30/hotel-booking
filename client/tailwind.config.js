@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-const fontStack = ['"Plus Jakarta Sans"', "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"];
+const fontStack = ['"Plus Jakarta Sans"', '"Hind Siliguri"', "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"];
 
 export default {
   future: {

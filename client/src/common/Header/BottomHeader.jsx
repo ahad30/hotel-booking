@@ -3,21 +3,22 @@ import { LuBell, LuCompass, LuHeart, LuHouse, LuLayoutDashboard, LuUser } from "
 import { useAppSelector } from "../../redux/Hook/Hook";
 import { useCurrentUser } from "../../redux/Feature/auth/authSlice";
 import { useUnreadCount } from "./Navbar";
+import { useI18n } from "../../i18n/LanguageProvider";
 
 const customerTabs = [
-  { to: "/", label: "Home", icon: LuHouse, end: true },
-  { to: "/hotels", label: "Explore", icon: LuCompass },
-  { to: "/saved", label: "Saved", icon: LuHeart },
-  { to: "/notification", label: "Alerts", icon: LuBell, badge: true },
-  { to: "/user/overview", label: "Account", icon: LuUser },
+  { to: "/", label: "tabs.home", icon: LuHouse, end: true },
+  { to: "/hotels", label: "tabs.explore", icon: LuCompass },
+  { to: "/saved", label: "tabs.saved", icon: LuHeart },
+  { to: "/notification", label: "tabs.alerts", icon: LuBell, badge: true },
+  { to: "/user/overview", label: "tabs.account", icon: LuUser },
 ];
 
 // Customer pages are off-limits to admins, so they get the dashboard instead.
 const adminTabs = [
-  { to: "/", label: "Home", icon: LuHouse, end: true },
-  { to: "/hotels", label: "Explore", icon: LuCompass },
-  { to: "/saved", label: "Saved", icon: LuHeart },
-  { to: "/admin/home", label: "Dashboard", icon: LuLayoutDashboard },
+  { to: "/", label: "tabs.home", icon: LuHouse, end: true },
+  { to: "/hotels", label: "tabs.explore", icon: LuCompass },
+  { to: "/saved", label: "tabs.saved", icon: LuHeart },
+  { to: "/admin/home", label: "tabs.dashboard", icon: LuLayoutDashboard },
 ];
 
 // Pages with their own sticky bottom action bar hide the tab bar.
@@ -28,6 +29,7 @@ const BottomHeader = () => {
   const { pathname } = useLocation();
   const user = useAppSelector(useCurrentUser);
   const unread = useUnreadCount();
+  const { t } = useI18n();
   const tabs = user?.role === "admin" ? adminTabs : customerTabs;
 
   if (hiddenOn.includes(pathname) || pathname.startsWith("/hotel-details")) return null;
@@ -45,7 +47,7 @@ const BottomHeader = () => {
               end={end}
               className={({ isActive }) =>
                 `relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition ${
-                  isActive ? "text-brand-700" : "text-ink-400"
+                  isActive ? "text-brand-700" : "text-ink-500"
                 }`
               }
             >
@@ -59,7 +61,7 @@ const BottomHeader = () => {
                       </span>
                     )}
                   </span>
-                  {label}
+                  {t(label)}
                 </>
               )}
             </NavLink>

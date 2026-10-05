@@ -7,6 +7,7 @@ import { useLoginMutation } from "../../../redux/Feature/auth/authApi";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hook/Hook";
 import { setUser, useCurrentToken, useCurrentUser } from "../../../redux/Feature/auth/authSlice";
 import AuthShell from "../AuthShell";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Login = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
+  const { t } = useI18n();
 
   const [login, { isLoading, error, isError, isSuccess, data: loginData }] = useLoginMutation();
 
@@ -42,13 +44,13 @@ const Login = () => {
 
   return (
     <AuthShell
-      title="Welcome back"
-      subtitle="Log in to book rooms and manage your stays."
+      title={t("auth.welcome")}
+      subtitle={t("auth.loginSubtitle")}
       footer={
         <>
-          New to BEHB?{" "}
+          {t("auth.newHere")}{" "}
           <Link to="/register" className="font-semibold text-brand-700 hover:underline">
-            Create an account
+            {t("auth.createAccount")}
           </Link>
         </>
       }

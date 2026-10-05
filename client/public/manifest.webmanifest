@@ -1,0 +1,23 @@
+{
+  "name": "BEHB — Book Hotels Across Bangladesh",
+  "short_name": "BEHB",
+  "description": "Find and book hotels across all 8 divisions of Bangladesh with live room availability.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0b1020",
+  "lang": "en",
+  "categories": ["travel", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Find hotels", "url": "/hotels", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Saved hotels", "url": "/saved", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

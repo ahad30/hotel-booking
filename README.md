@@ -1,13 +1,22 @@
-# Hotel Booking
+# BEHB · Hotel Booking for Bangladesh
+
+[![CI](https://github.com/ahad30/hotel-booking/actions/workflows/ci.yml/badge.svg)](https://github.com/ahad30/hotel-booking/actions/workflows/ci.yml)
+![Lighthouse desktop](https://img.shields.io/badge/Lighthouse%20(desktop)-95%20%7C%20100%20%7C%20100%20%7C%20100-success)
+![PWA](https://img.shields.io/badge/PWA-installable%20%2B%20offline-7c3aed)
+![i18n](https://img.shields.io/badge/i18n-English%20%7C%20%E0%A6%AC%E0%A6%BE%E0%A6%82%E0%A6%B2%E0%A6%BE-0ea5e9)
 
 A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **division → district → area**, check room availability, book rooms and pay online through **SSLCommerz**. Admins manage hotels, rooms, locations, bookings, users, homepage sliders and notifications from a dashboard.
 
 - **Live site:** https://behb-hotel-booking.vercel.app
+- **API docs:** https://hotel-booking-server-theta.vercel.app/api-docs
+- **Try it:** the [read-only demo admin](#demo-admin-login), or ask the trip assistant on the home page for *"Family of 4 in Chattogram under ৳6,000 with a pool this weekend"*.
 
 ---
 
 ## Table of contents
 
+- [What makes it different](#what-makes-it-different)
+- [Architecture](#architecture)
 - [Highlights](#highlights)
 - [Features](#features)
 - [Tech stack](#tech-stack)
@@ -18,8 +27,77 @@ A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **di
 - [Getting started](#getting-started)
 - [Environment variables](#environment-variables)
 - [Scripts](#scripts)
+- [Testing and CI](#testing-and-ci)
 - [Deployment](#deployment)
 - [Demo admin login](#demo-admin-login)
+
+---
+
+## What makes it different
+
+### AI trip assistant
+Describe the trip in a sentence and get bookable rooms back:
+
+> *"Couple in Sylhet, 3 nights from 12 Oct, with spa"*
+
+1. `POST /api/v1/assistant/search` sends the sentence to **Claude** with a strict JSON schema (structured output). The schema only allows the divisions and amenities that exist in the database, so the model can't invent filters.
+2. The server matches real hotels, then runs the **same availability check as checkout** for the dates, so every result can really be booked.
+3. The UI shows *"We understood"* chips (place, budget, guests, dates, amenities) so the person can see how the request was read, and each result links to the hotel with the dates filled in.
+
+It is built to fail safely: when no `ANTHROPIC_API_KEY` is set, or Claude errors, times out or declines, a **deterministic rule-based parser** (`server/src/services/Assistant/ruleParser.js`, unit-tested) handles the request instead. The endpoint is rate-limited per IP (8 requests per minute).
+
+### Availability heatmap calendar
+Each hotel page shows the next 8 weeks as a calendar coloured by **how many rooms are free each night**, filterable by room type. Fully booked nights are hatched. Tap a check-in date and then a check-out date to set the stay. It is served by `GET /hotel/:id/availability`, which counts nights with the same `bookedQuantity` rules as checkout, so the calendar and checkout never disagree.
+
+### English / বাংলা
+A language switch in the navbar translates the public site into Bangla (with the Hind Siliguri font and looser line heights for Bangla script). The choice is saved, and `<html lang>` is updated for screen readers and search engines. Translations live in `client/src/i18n/dictionary.js`.
+
+### Installable PWA that works offline
+A web app manifest, icons and a hand-written service worker (`client/public/sw.js`):
+- **Pages:** network first, so new deploys show up straight away. Offline, the cached app shell loads, and pages you've opened before still work.
+- **Build files** (`/assets/*`, content-hashed): cache first.
+- **Photos and fonts:** served from cache and refreshed in the background, capped at 80 entries.
+- **The API is never cached**, so prices and availability are always live.
+- A page that hasn't been downloaded yet shows a clear *"You're offline"* screen instead of a 404.
+
+### Tested, with CI on every push
+Unit tests for the server, Playwright end-to-end tests for the main user journeys on desktop and mobile, and a GitHub Actions pipeline. See [Testing and CI](#testing-and-ci).
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Browser
+        UI["React 18 SPA<br/>RTK Query · i18n"]
+        SW["Service worker<br/>offline shell + asset cache"]
+    end
+    subgraph Vercel
+        API["Express API<br/>JWT auth · roles · rate limit"]
+        AS["Assistant service"]
+        BS["Booking service<br/>availability rules"]
+    end
+    DB[("MongoDB<br/>via Prisma")]
+    Claude["Claude API<br/>structured output"]
+    SSL["SSLCommerz"]
+
+    UI <--> SW
+    UI -- "/api/v1 (Bearer JWT)" --> API
+    API --> AS & BS
+    AS -- "sentence → filters" --> Claude
+    AS -- "check dates" --> BS
+    BS --> DB
+    API --> DB
+    API -- "payment session + validation" --> SSL
+    SSL -- "callbacks" --> API
+```
+
+**Design decisions**
+- **One availability rule, used everywhere.** Checkout, the calendar and the assistant all count booked rooms with `BookingService.bookedQuantity`, so they always agree. Unpaid checkouts hold their rooms for 30 minutes.
+- **Use the LLM for understanding, not for data.** Claude only turns the sentence into filters, and the database decides the results. This keeps answers grounded, cheap (low effort, a small JSON output) and testable.
+- **Payments are trusted only once verified.** SSLCommerz callbacks are re-validated with the gateway (status, transaction ID and amount) before a booking is marked paid.
+- **Fast first screen on slow phones.** Routes are code-split, and the home page builds only the first screen up front, mounting later sections when they scroll near or the browser is idle (`components/ui/Deferred.jsx`).
 
 ---
 
@@ -30,8 +108,24 @@ A full-stack hotel booking platform for Bangladesh. Guests browse hotels by **di
 - Fully responsive: a transparent navbar over the hero photo on desktop, and a floating tab bar plus bottom booking bar on phones.
 - Accessible details: keyboard-friendly modals and photo viewer (Escape and arrow keys), visible focus rings, ARIA labels, and support for reduced-motion settings.
 
+### Security
+- **JWT authentication** on every private endpoint, with role-based access: admin-only management routes, and "self or admin" for a user's own profile, bookings and notifications.
+- **No secrets in responses or code:** password hashes are never returned, credentials live in environment variables (see `server/.env.example`), and public sign-up cannot create admin accounts.
+- **Payments are verified server-side:** SSLCommerz callbacks are confirmed with the SSLCommerz validation API (status, transaction ID and amount) before a booking is marked paid.
+- **Availability is re-checked at checkout**, per room type and quantity, before the customer is sent to payment.
+- **Read-only demo admin** (`DEMO_ADMIN_PHONE`) so the public demo can't change live data.
+
 ### Performance
-Measured on the production build of the home page:
+Lighthouse 12 on a local production build of the home page:
+
+| | Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|---|
+| Desktop | 95 | 100 | 100 | 100 |
+| Mobile (simulated slow 4G, 4× CPU slowdown) | 56 | 100 | 100 | 100 |
+
+Desktop LCP is 1.3 s with CLS 0.001. On mobile, the remaining cost is the client-side rendered React app on a throttled CPU. Deferring below-the-fold sections cut total blocking time from 870 ms to about 560 ms. Server-side rendering is the next step.
+
+Download size, measured on the production build of the home page:
 
 | Home page download | Before redesign | After |
 |---|---|---|
@@ -49,7 +143,12 @@ How:
 ## Features
 
 ### Guests / customers
+- **AI trip assistant**: describe a trip in plain English and get rooms that are really available
 - Search hotels by name, division and district from the home page, with grid or list view and live "from ৳X / night" prices
+- **Availability heatmap calendar** on every hotel page
+- Save hotels, compare up to 3 side by side, and see recently viewed hotels
+- **English / Bangla** language switch
+- Install the site as an app (PWA), with an offline fallback
 - Browse hotels by location (division → district → area → hotels)
 - Hotel page with a photo gallery and full-screen viewer, amenities, map, and room cards with room, adult and child counts
 - Check room availability for chosen check-in and check-out dates (changing dates clears selected rooms so availability is re-checked)
@@ -60,7 +159,7 @@ How:
 - In-app notifications, such as booking confirmations
 
 ### Admins
-- Separate admin login (`/admin-login`) and role-protected admin dashboard
+- One login page for everyone: admins land in the role-protected admin dashboard, and customers go back to where they were
 - Dashboard statistics
 - CRUD for **hotels**, **rooms**, **areas**, **homepage sliders** and **users**
 - View and edit bookings
@@ -84,6 +183,9 @@ How:
 | **Database / ORM** | MongoDB with Prisma 6 |
 | **Auth** | bcryptjs (password hashing), jsonwebtoken (JWT) |
 | **Payments** | SSLCommerz (`sslcommerz-lts`) |
+| **AI** | Claude through `@anthropic-ai/sdk` (structured JSON output), with a rule-based fallback |
+| **Testing** | Node's built-in test runner (server), Playwright (end to end), GitHub Actions |
+| **PWA** | Web app manifest and a hand-written service worker |
 | **Email** | Nodemailer |
 | **API docs** | swagger-jsdoc, swagger-ui-express |
 | **Hosting** | Vercel (client and server), Netlify (client mirror) |
@@ -167,7 +269,12 @@ Hotel_Booking/
         ├── shared/                 # catchAsync, response handler, email utility
         ├── utility/                # Bcrypt password hasher
         └── error/                  # API error handling
+
+e2e/                                # Playwright tests (mocked API, desktop + mobile)
+.github/workflows/ci.yml            # Lint, build, unit tests, end-to-end tests
 ```
+
+Also new: `client/src/i18n/` (English/Bangla dictionary and provider), `client/src/Pages/Home/Assistant/` (trip assistant UI), `client/public/sw.js` + `manifest.webmanifest` (PWA), `server/src/services/Assistant/` (Claude + rule-based parser), `server/src/middleware/rateLimit.js`, `server/test/` and `server/prisma/seed-bangladesh.js`.
 
 ### Backend architecture
 
@@ -211,6 +318,8 @@ Every endpoint starts with **`/api/v1`**. Interactive docs are served at **`/api
 | **Bookings** | `POST /booking/create`, `GET /booking`, `GET\|PUT\|DELETE /booking/:id`, `POST /booking/check-availability`, `GET /booking/user/:userId` |
 | **Sliders** | `POST /sliders/create`, `GET /sliders`, `GET\|PUT\|DELETE /sliders/:id` |
 | **Notifications** | `POST /notification/create`, `GET /notification/:userId`, `PUT /notification/:id/read` |
+| **Assistant** | `POST /assistant/search` (rate-limited) |
+| **Availability** | `GET /hotel/:hotelId/availability?from=YYYY-MM-DD&days=42` |
 | **Divisions** | `POST /division/create`, `GET /division`, `GET\|PUT\|DELETE /division/:id` |
 | **Districts** | `POST /district/create`, `GET /district`, `GET\|PUT\|DELETE /district/:id`, `GET /district/by-division/:id` |
 | **Areas** | `POST /area/create`, `GET /area`, `GET\|PUT\|DELETE /area/:id`, `GET /area/by-district/:id` |
@@ -225,7 +334,8 @@ Every endpoint starts with **`/api/v1`**. Interactive docs are served at **`/api
 | `/division` → `/district/:divisionId` → `/area/:districtId` → `/hotel/:areaId` | Browse hotels by location |
 | `/hotel-details/:id` | Hotel details, rooms and gallery |
 | `/checkout`, `/success`, `/cancel` | Booking and payment flow |
-| `/login`, `/register`, `/admin-login`, `/verify/:token` | Sign-in and sign-up |
+| `/hotels`, `/compare`, `/saved`, `/contact` | Search with filters, side-by-side comparison, saved hotels, contact |
+| `/login`, `/register`, `/verify/:token` | Sign-in (all roles) and sign-up |
 | `/notification`, `/privacy-policy` | Misc |
 | `/admin/*` | Admin dashboard (admins only) |
 | `/user/user-profile`, `/user/user-booking` | Customer dashboard (logged-in users only) |
@@ -279,12 +389,18 @@ The server's CORS settings allow `http://localhost:5173` and `http://localhost:5
 |---|---|
 | `DATABASE_URL` | MongoDB connection string used by Prisma |
 | `PORT` | API port (default `5000`) |
-| `BACKEND_URL` | Public URL of the API, used for SSLCommerz callback URLs (default `http://localhost:5000`) |
-| `FRONTEND_URL` | Public URL of the client (default `http://localhost:3000`) |
+| `SERVER_URL` | Public URL of the API, used for SSLCommerz callback URLs (default `http://localhost:5000`) |
+| `CLIENT_URL` | Public URL of the client, where customers return after payment (default `http://localhost:5173`) |
+| `JWT_SECRET` | **Required.** Long random string used to sign login tokens |
+| `JWT_EXPIRES_IN` | Login token lifetime (default `7d`) |
+| `DEMO_ADMIN_PHONE` | Optional. Phone number of a demo admin that can browse the dashboard but not change data |
 | `SSLCOMMERZ_STORE_ID` | SSLCommerz store ID |
 | `SSLCOMMERZ_STORE_PASSWORD` | SSLCommerz store password |
 | `SSLCOMMERZ_IS_LIVE` | `true` for production, `false` for sandbox |
-| `SSLCOMMERZ_SUCCESS_URL` | Payment success callback URL |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` | Optional. Mail server used for verification emails |
+| `ANTHROPIC_API_KEY` | Optional. Enables Claude for the trip assistant. Without it, the rule-based parser is used |
+
+Copy `server/.env.example` and `client/.env.example` to get started.
 
 ### `client/.env`
 
@@ -313,6 +429,35 @@ The server's CORS settings allow `http://localhost:5173` and `http://localhost:5
 | `npm start` | Start the API with nodemon |
 | `npm run prisma:push` | Push the Prisma schema to the database |
 | `npm run vercel-build` | Run `prisma generate` (used by Vercel) |
+| `npm test` | Run the unit tests |
+| `npm run seed:bd` | Add demo hotels and rooms across all 8 divisions of Bangladesh |
+
+### End-to-end tests (`e2e/`)
+| Script | Description |
+|---|---|
+| `npm test` | Build the client and run the Playwright tests (set `PW_CHANNEL=chrome` to use an installed Chrome) |
+| `npm run report` | Open the last HTML report |
+
+---
+
+## Testing and CI
+
+**Server unit tests** (`server/test/`, `node --test`, no extra dependencies):
+- JWT middleware: a missing, forged or expired token is rejected, roles are enforced, the demo admin is read-only, and owner-or-admin checks work
+- Rate limiter: limits per client, `Retry-After` header, window reset
+- Trip parser: places and their aliases, budgets (`under 6k`, `between 2k and 5k`), guests (`family of 4`, `couple`), Bangladesh's Friday–Saturday weekend, explicit dates and night counts
+- Booking quantity rules, including older bookings saved before quantities existed
+
+**End-to-end tests** (`e2e/`, Playwright, desktop Chrome and Pixel 7). They run against a real production build with the API mocked from fixtures, so they're fast and repeatable:
+- Home page → hotel page
+- Switching to Bangla, and the choice surviving a reload
+- Trip assistant: what it understood, and the booking link with dates
+- Hotel page: a fully booked night on the calendar, choosing a room, and Reserve asking a guest to log in
+- Comparing two hotels
+- PWA: the manifest and icons are served, and the app works offline
+- No sideways scrolling on key pages, on phone and desktop
+
+**GitHub Actions** (`.github/workflows/ci.yml`) runs three jobs on every push and pull request: client lint + build, server tests, and Playwright (with the HTML report uploaded when a test fails).
 
 ---
 
@@ -339,4 +484,6 @@ Sign in at [behb-hotel-booking.vercel.app/login](https://behb-hotel-booking.verc
 
 | Role | Phone | Password |
 |---|---|---|
-| Admin | `01883687463` | `123456` |
+| Admin (read-only demo) | `01000000000` | `Demo@1234` |
+
+This account can open every dashboard page, but the API refuses any change it tries to make, so the live data stays intact.

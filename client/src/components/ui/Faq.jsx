@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
+import { useI18n } from "../../i18n/LanguageProvider";
 
 // Answers describe how the booking flow actually works in this app.
 export const FAQS = [
@@ -53,11 +54,40 @@ const FaqItem = ({ item, open, onToggle }) => {
   );
 };
 
-const Faq = ({ items = FAQS }) => {
+export const FAQS_BN = [
+  {
+    q: "কীভাবে রুম বুক করব?",
+    a: "একটি হোটেল খুলুন, চেক-ইন ও চেক-আউটের তারিখ বাছুন, রুম আর অতিথির সংখ্যা ঠিক করুন, তারপর \"বুক করুন\" চাপুন। চেকআউটে আপনার তথ্য দিয়ে SSLCommerz-এর মাধ্যমে নিরাপদে পেমেন্ট করুন।",
+  },
+  {
+    q: "কোন কোন পদ্ধতিতে পেমেন্ট করা যায়?",
+    a: "পেমেন্ট হয় SSLCommerz-এর মাধ্যমে — ডেবিট ও ক্রেডিট কার্ড, বিকাশ, নগদ, রকেটের মতো মোবাইল ব্যাংকিং এবং ইন্টারনেট ব্যাংকিং।",
+  },
+  {
+    q: "পেমেন্ট করার সময় কি রুম আমার জন্য আটকে রাখা হয়?",
+    a: "হ্যাঁ। চেকআউট শুরু করলে পেমেন্ট শেষ করার জন্য রুম ৩০ মিনিট আপনার জন্য রাখা হয়। পেমেন্ট ব্যর্থ বা বাতিল হলে রুম সঙ্গে সঙ্গে ছেড়ে দেওয়া হয়।",
+  },
+  {
+    q: "পেমেন্ট ব্যর্থ হলে কী হবে?",
+    a: "আপনার কাছ থেকে টাকা কাটা হবে না, আর বুকিং নিজে থেকেই বাতিল হয়ে যাবে। হোটেলে ফিরে আবার চেষ্টা করতে পারবেন; পেমেন্টের আগে প্রাপ্যতা আবার যাচাই করা হয়।",
+  },
+  {
+    q: "আমার বুকিং আর রসিদ কোথায় পাব?",
+    a: "লগ ইন করে \"আমার বুকিং\" খুলুন। প্রতিটি বুকিংয়ের অবস্থা দেখা যায়, আর PDF রসিদ ডাউনলোড করা যায়।",
+  },
+  {
+    q: "বুকিংয়ের পর তারিখ বদলানো যাবে?",
+    a: "যোগাযোগ পাতা থেকে বুকিংয়ের তথ্যসহ আমাদের মেসেজ করুন, আমরা পরিবর্তনে সাহায্য করব।",
+  },
+];
+
+const Faq = ({ items, limit }) => {
+  const { lang } = useI18n();
+  const list = (items || (lang === "bn" ? FAQS_BN : FAQS)).slice(0, limit || undefined);
   const [open, setOpen] = useState(0);
   return (
     <div className="card px-6 sm:px-8">
-      {items.map((item, i) => (
+      {list.map((item, i) => (
         <FaqItem key={item.q} item={item} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
       ))}
     </div>

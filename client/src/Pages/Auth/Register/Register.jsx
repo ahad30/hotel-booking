@@ -10,11 +10,13 @@ import { useCurrentToken, useCurrentUser } from "../../../redux/Feature/auth/aut
 import { useRegisterMutation } from "../../../redux/Feature/auth/authApi";
 // import Modal from "../../../components/ui/Modal";
 import AuthShell from "../AuthShell";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 const Register = () => {
   const navigate = useNavigate();
   const user = useAppSelector(useCurrentUser);
   const token = useAppSelector(useCurrentToken);
+  const { t } = useI18n();
   // const [showModal, setShowModal] = useState(false);
 
   const [register, { isLoading, error, isError, isSuccess, data: rData }] = useRegisterMutation();
@@ -43,13 +45,13 @@ const Register = () => {
   return (
     <>
       <AuthShell
-        title="Create your account"
-        subtitle="It takes a minute, and you can book straight away."
+        title={t("auth.registerTitle")}
+        subtitle={t("auth.registerSubtitle")}
         footer={
           <>
-            Already have an account?{" "}
+            {t("auth.haveAccount")}{" "}
             <Link to="/login" className="font-semibold text-brand-700 hover:underline">
-              Log in
+              {t("auth.login")}
             </Link>
           </>
         }

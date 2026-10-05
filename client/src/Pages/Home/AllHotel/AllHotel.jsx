@@ -55,8 +55,8 @@ const AllHotel = () => {
   return (
     <section id="hotels" className="container-x scroll-mt-24 pt-20 sm:pt-28">
       <SectionHeader
-        eyebrow="Stays"
-        title={hasFilters ? "Hotels matching your search" : "Handpicked hotels for you"}
+        eyebrow="home.staysEyebrow"
+        title={hasFilters ? "home.staysTitleFiltered" : "home.staysTitle"}
         subtitle={isFetching ? "Finding hotels…" : `${pluralize(hotels.length, "hotel")} available to book`}
         action={
           <div className="flex shrink-0 rounded-full bg-ink-100 p-1" role="group" aria-label="Layout">

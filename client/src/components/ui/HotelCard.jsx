@@ -4,19 +4,23 @@ import { LuArrowUpRight, LuBedDouble, LuMapPin } from "react-icons/lu";
 import SmartImage from "./SmartImage";
 import HotelActions from "./HotelActions";
 import { AmenityChip } from "./amenities";
-import { formatTaka, lowestRoomPrice, pluralize } from "../../utils/format";
+import { formatTaka, lowestRoomPrice } from "../../utils/format";
+import { useI18n } from "../../i18n/LanguageProvider";
 
-const PriceTag = ({ price }) =>
-  price ? (
+const PriceTag = ({ price }) => {
+  const { t } = useI18n();
+  return price ? (
     <p className="text-sm text-ink-500">
-      from <span className="text-lg font-extrabold text-ink-950">{formatTaka(price)}</span>
-      <span className="text-xs"> / night</span>
+      {t("card.from")} <span className="text-lg font-extrabold text-ink-950">{formatTaka(price)}</span>
+      <span className="text-xs"> {t("card.perNight")}</span>
     </p>
   ) : (
-    <p className="text-sm font-medium text-ink-400">Rooms coming soon</p>
+    <p className="text-sm font-medium text-ink-400">{t("card.comingSoon")}</p>
   );
+};
 
 const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
+  const { t } = useI18n();
   const price = lowestRoomPrice(hotel?.rooms);
   const roomCount = hotel?.rooms?.length || 0;
   const amenities = hotel?.amenities || [];
@@ -54,7 +58,7 @@ const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
           <div className="mt-auto flex items-end justify-between gap-4 pt-2">
             <PriceTag price={price} />
             <span className="btn-primary px-5 py-2.5">
-              View rooms <LuArrowUpRight className="h-4 w-4" />
+              {t("card.viewRooms")} <LuArrowUpRight className="h-4 w-4" />
             </span>
           </div>
         </div>
@@ -83,7 +87,7 @@ const HotelCard = ({ hotel, layout = "grid", index = 0 }) => {
         {roomCount > 0 && (
           <span className="absolute left-3 top-3 hidden items-center gap-1.5 rounded-full bg-white/90 sm:inline-flex px-3 py-1 text-xs font-semibold text-ink-800 shadow-soft backdrop-blur">
             <LuBedDouble className="h-3.5 w-3.5 text-brand-600" />
-            {pluralize(roomCount, "room type")}
+            {roomCount === 1 ? t("card.oneRoomType") : t("card.roomTypes", { count: roomCount })}
           </span>
         )}
       </div>
