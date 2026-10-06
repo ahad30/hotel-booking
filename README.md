@@ -8,6 +8,8 @@ A full-stack hotel booking app for Bangladesh. Find hotels across all 8 division
 
 **Live site:** https://behb-hotel-booking.vercel.app
 
+![BEHB home page](docs/screenshots/home.jpg)
+
 ---
 
 ## Features
@@ -20,6 +22,30 @@ A full-stack hotel booking app for Bangladesh. Find hotels across all 8 division
 - **Installable PWA:** works offline for pages you've already opened.
 - **Secure API:** JWT login, role-based access, rate limiting and a read-only demo admin.
 - **Admin dashboard:** manage hotels, rooms, locations, bookings, users, sliders and notifications.
+
+## Screenshots
+
+**AI trip assistant**: describe the trip and get rooms that are free for your dates.
+
+![AI trip assistant](docs/screenshots/assistant.jpg)
+
+| Explore hotels | Hotel page |
+|---|---|
+| ![Explore hotels](docs/screenshots/explore.jpg) | ![Hotel page](docs/screenshots/hotel.jpg) |
+| **Availability calendar** | **বাংলা (Bangla)** |
+| ![Availability calendar](docs/screenshots/calendar.jpg) | ![Bangla home page](docs/screenshots/home-bangla.jpg) |
+
+**Admin dashboard**
+
+![Admin dashboard](docs/screenshots/admin.jpg)
+
+**On mobile**
+
+<p>
+  <img src="docs/screenshots/mobile-home.jpg" alt="Mobile home" width="250" />
+  <img src="docs/screenshots/mobile-explore.jpg" alt="Mobile explore" width="250" />
+  <img src="docs/screenshots/mobile-hotel.jpg" alt="Mobile hotel page" width="250" />
+</p>
 
 ## Tech stack
 
@@ -98,9 +124,37 @@ Code splitting cut the home page's JavaScript from 4.4 MB to 438 KB.
 ## Project structure
 
 ```
-client/   React app (pages, components, i18n, redux)
-server/   Express API (routes, controllers, services, prisma)
-e2e/      Playwright tests
+hotel-booking/
+├── client/                    # React + Vite frontend
+│   ├── public/                # Icons, PWA manifest, service worker, offline page
+│   └── src/
+│       ├── Pages/             # Home, Hotels, HotelDetails, Compare, Saved, Checkout,
+│       │                      # Auth, Dashboard (admin + user), Notification, ...
+│       ├── components/ui/     # Shared UI: HotelCard, Modal, Stepper, SmartImage, ...
+│       ├── common/            # Navbar, mobile tab bar, footer, error page
+│       ├── Layouts/           # Public and dashboard layouts
+│       ├── Routes/            # Routes and role-based route guards
+│       ├── redux/             # Store and RTK Query API endpoints
+│       ├── i18n/              # English / Bangla translations
+│       └── utils/             # Helpers (price format, local collections, ...)
+│
+├── server/                    # Express + Prisma backend
+│   ├── index.js               # App entry (CORS, JSON, routes)
+│   ├── prisma/
+│   │   ├── schema.prisma      # MongoDB data model
+│   │   └── seed-bangladesh.js # Demo hotels across all 8 divisions
+│   ├── src/
+│   │   ├── routes/            # All /api/v1 endpoints
+│   │   ├── controllers/       # Request → service → response
+│   │   ├── services/          # Business logic: Hotel, Room, Booking, Assistant,
+│   │   │                      # PaymentGateway, User, Notification, ...
+│   │   ├── middleware/        # JWT auth, roles, rate limit
+│   │   └── config/ shared/    # Env config and helpers
+│   └── test/                  # Unit tests (node --test)
+│
+├── e2e/                       # Playwright end-to-end tests
+├── docs/screenshots/          # Images used in this README
+└── .github/workflows/ci.yml   # CI: lint, build and tests
 ```
 
 ## Deployment
