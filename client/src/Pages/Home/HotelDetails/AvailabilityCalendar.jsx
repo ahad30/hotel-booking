@@ -103,13 +103,13 @@ const AvailabilityCalendar = ({ hotelId, checkIn, checkOut, onSelect }) => {
         <div className="skeleton mt-5 h-72 rounded-2xl" />
       ) : (
         <>
-          <div className="relative mt-5 max-w-md">
-            <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-ink-500" aria-hidden="true">
+          <div className="relative mt-5">
+            <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-ink-500 sm:gap-2" aria-hidden="true">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                 <span key={d}>{d}</span>
               ))}
             </div>
-            <div className="mt-2 grid grid-cols-7 gap-1.5">
+            <div className="mt-2 grid grid-cols-7 gap-1.5 sm:gap-2">
               {cells.map((date) => {
                 const free = freeOn(date);
                 const past = isBefore(date, today);
@@ -132,7 +132,7 @@ const AvailabilityCalendar = ({ hotelId, checkIn, checkOut, onSelect }) => {
                     onBlur={() => setHover(null)}
                     aria-label={label}
                     aria-pressed={Boolean(isEdge(date))}
-                    className={`relative flex aspect-square flex-col items-center justify-center rounded-xl text-sm font-bold tabular-nums transition disabled:cursor-default ${
+                    className={`relative flex aspect-square flex-col sm:aspect-auto sm:h-14 lg:h-16 items-center justify-center rounded-xl text-sm font-bold tabular-nums transition disabled:cursor-default ${
                       isEdge(date) ? "ring-2 ring-ink-950 ring-offset-2" : inStay(date) ? "ring-2 ring-brand-300" : ""
                     } ${past || outOfRange ? "text-ink-300" : "hover:scale-105 focus-visible:scale-105"}`}
                     style={

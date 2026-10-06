@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { LuSearch, LuSearchX, LuSlidersHorizontal, LuX } from "react-icons/lu";
+import { LuChevronDown, LuSearch, LuSearchX, LuSlidersHorizontal, LuX } from "react-icons/lu";
 import { useAllHotels } from "../../utils/useAllHotels";
 import { useGetDivisionsQuery } from "../../redux/Feature/User/place/placeApi";
 import HotelCard, { HotelCardSkeleton } from "../../components/ui/HotelCard";
@@ -9,6 +9,10 @@ import SelectField from "../../components/ui/SelectField";
 import PriceRange from "./PriceRange";
 import { getAmenityIcon } from "../../components/ui/amenities";
 import { pluralize } from "../../utils/format";
+import { useI18n } from "../../i18n/LanguageProvider";
+
+// Results load in pages: more are added as you scroll, or with "Show more".
+const PAGE_SIZE = 12;
 
 const SORTS = {
   recommended: { label: "Recommended", fn: () => 0 },
@@ -103,6 +107,9 @@ const Hotels = () => {
   const divisions = divisionData?.data || [];
   const { filters, update, reset } = useFilters();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  const sentinel = useRef(null);
+  const { t } = useI18n();
 
   const amenityOptions = useMemo(
     () => [...new Set(hotels.flatMap((h) => h.amenities || []))].sort((a, b) => a.localeCompare(b)),
@@ -123,6 +130,26 @@ const Hotels = () => {
       .filter((h) => (filters.min === null && filters.max === null) || (h.fromPrice !== null && h.fromPrice >= (filters.min ?? 0) && h.fromPrice <= (filters.max ?? Infinity)))
       .sort(SORTS[filters.sort].fn);
   }, [hotels, filters]);
+
+  // Start from the first page whenever the filters change.
+  const filterKey = JSON.stringify(filters);
+  useEffect(() => setVisible(PAGE_SIZE), [filterKey]);
+
+  const hasMore = visible < results.length;
+  const showMore = () => setVisible((v) => v + PAGE_SIZE);
+
+  // Infinite scroll: load the next page when the end of the list comes near.
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || !hasMore) return undefined;
+    // Also counts as reached when a jump (End key, scrollbar drag) lands past it.
+    const observer = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting || entry.boundingClientRect.top < 0) && setVisible((v) => v + PAGE_SIZE),
+      { rootMargin: "400px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, visible]);
 
   const activeCount =
     (filters.division ? 1 : 0) + filters.amenities.length + (filters.min !== null || filters.max !== null ? 1 : 0);
@@ -221,9 +248,25 @@ const Hotels = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-3">
-              {results.map((h, i) => (
-                <HotelCard key={h.id} hotel={h} index={i} />
+              {results.slice(0, visible).map((h, i) => (
+                <HotelCard key={h.id} hotel={h} index={i % PAGE_SIZE} />
               ))}
+            </div>
+          )}
+
+          {!isLoading && !isError && results.length > PAGE_SIZE && (
+            <div ref={sentinel} className="mt-10 flex flex-col items-center gap-3">
+              <p className="text-sm font-medium text-ink-500">
+                {t("common.showing", { shown: Math.min(visible, results.length), total: results.length })}
+              </p>
+              <div className="h-1.5 w-48 overflow-hidden rounded-full bg-ink-100" aria-hidden="true">
+                <div className="h-full rounded-full bg-brand-600 transition-all" style={{ width: `${(Math.min(visible, results.length) / results.length) * 100}%` }} />
+              </div>
+              {hasMore && (
+                <button onClick={showMore} className="btn-ghost mt-1">
+                  {t("common.showMore")} <LuChevronDown className="h-4 w-4" />
+                </button>
+              )}
             </div>
           )}
         </section>
