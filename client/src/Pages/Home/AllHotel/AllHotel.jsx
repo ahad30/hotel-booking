@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
-import { LuLayoutGrid, LuList, LuRefreshCw, LuSearchX, LuX } from "react-icons/lu";
+import { Link, useOutletContext } from "react-router-dom";
+import { LuArrowRight, LuLayoutGrid, LuList, LuRefreshCw, LuSearchX, LuX } from "react-icons/lu";
 import { useGetHotelsBySearchQuery } from "../../../redux/Feature/Admin/hotel/hotelApi";
 import { useGetDistrictsByDivisionQuery, useGetDivisionsQuery } from "../../../redux/Feature/User/place/placeApi";
 import HotelCard, { HotelCardSkeleton } from "../../../components/ui/HotelCard";
 import SectionHeader from "../SectionHeader";
 import { pluralize } from "../../../utils/format";
+import { useI18n } from "../../../i18n/LanguageProvider";
 
 const VIEW_KEY = "behb:hotel-view";
+// The home page shows a short selection; the full list lives on /hotels.
+const HOME_LIMIT = 6;
 
 const readView = () => {
   try {
@@ -29,6 +32,7 @@ const FilterChip = ({ label, onClear }) => (
 const AllHotel = () => {
   const { searchQuery, setSearchQuery, divisionId, cityId, setFilters } = useOutletContext();
   const [view, setView] = useState(readView);
+  const { t } = useI18n();
 
   useEffect(() => {
     try {
@@ -43,7 +47,9 @@ const AllHotel = () => {
   const { data: districts } = useGetDistrictsByDivisionQuery(divisionId, { skip: !divisionId });
 
   const hotels = data?.data || [];
+  const shown = hotels.slice(0, HOME_LIMIT);
   const hasFilters = Boolean(searchQuery || divisionId || cityId);
+  const allLink = `/hotels?${new URLSearchParams({ ...(searchQuery && { q: searchQuery }), ...(divisionId && { division: divisionId }) })}`;
   const divisionName = divisions?.data?.find((d) => String(d.serialId) === String(divisionId))?.name;
   const districtName = districts?.data?.find((d) => String(d.serialId) === String(cityId))?.name;
 
@@ -94,8 +100,16 @@ const AllHotel = () => {
       <div className={`mt-8 ${view === "grid" ? "grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3" : "flex flex-col gap-5"}`}>
         {isFetching
           ? Array.from({ length: 6 }).map((_, i) => <HotelCardSkeleton key={i} layout={view} />)
-          : hotels.map((hotel, i) => <HotelCard key={hotel.id} hotel={hotel} layout={view} index={i} />)}
+          : shown.map((hotel, i) => <HotelCard key={hotel.id} hotel={hotel} layout={view} index={i} />)}
       </div>
+
+      {!isFetching && hotels.length > HOME_LIMIT && (
+        <div className="mt-8 flex justify-center">
+          <Link to={allLink} className="btn-primary">
+            {t("common.viewAllHotels", { count: hotels.length })} <LuArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
 
       {!isFetching && isError && (
         <div className="card mt-4 flex flex-col items-center gap-4 px-6 py-14 text-center">

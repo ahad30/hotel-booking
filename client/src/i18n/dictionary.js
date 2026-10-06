@@ -87,6 +87,9 @@ export const dictionary = {
     "home.newsSubmit": "Subscribe",
     "home.newsDone": "You're subscribed. Watch your inbox for deals.",
     "common.allDestinations": "All destinations",
+    "common.viewAllHotels": "View all {count} hotels",
+    "common.showMore": "Show more hotels",
+    "common.showing": "Showing {shown} of {total}",
     "common.allFilters": "All filters",
 
     "card.from": "from",
@@ -233,6 +236,9 @@ export const dictionary = {
     "home.newsSubmit": "সাবস্ক্রাইব",
     "home.newsDone": "সাবস্ক্রাইব করা হয়েছে। অফারের জন্য ইনবক্স দেখুন।",
     "common.allDestinations": "সব গন্তব্য",
+    "common.viewAllHotels": "সব {count}টি হোটেল দেখুন",
+    "common.showMore": "আরও হোটেল দেখুন",
+    "common.showing": "{total}টির মধ্যে {shown}টি দেখানো হচ্ছে",
     "common.allFilters": "সব ফিল্টার",
 
     "card.from": "শুরু",
